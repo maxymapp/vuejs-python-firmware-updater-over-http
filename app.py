@@ -2,8 +2,23 @@ import cgi, requests
 from pprint import pprint
 
 from flask import Flask, render_template, request, jsonify
+from flask.json import dumps
 
 app = Flask('PitchUpdater')
+
+@app.route('/')
+def hello():
+    return render_template('index.html')
+
+@app.route('/submit', methods=['POST'])
+def submit():
+    #if request.method == 'POST':
+    return comparePitches(request.form['leftpitch'], request.form['rightpitch'])
+
+    #update config
+    #update firmware
+
+    #return
 
 @app.route('/config')
 def getConfig():
@@ -14,14 +29,15 @@ def getConfig():
     sizes['left'] = rdata['data'][1]['attributes']['size']
     sizes['right'] = rdata['data'][0]['attributes']['size']
 
-    return jsonify(sizes)
+    return sizes
 
+#@app.route('/newdims')
 def comparePitches(leftPitch, rightPitch):
     # extract selected pitch from requests
     # transform passed pitch to pixel dimensions
     # read current config
     # compare dimensions
-    getConfig()
+    config = getConfig()
 
     pitchDimensions = {
         '1.6': {
@@ -42,22 +58,14 @@ def comparePitches(leftPitch, rightPitch):
         }
     }
 
+    newDimensions = {}
+    newDimensions['left'] = pitchDimensions[leftPitch]
+    newDimensions['right'] = pitchDimensions[rightPitch]
+
+    #if newDimensions['left'] == config['left']
+    return dumps(newDimensions)
 
 
-
-@app.route('/')
-def hello():
-    return render_template('index.html')
-
-@app.route('/submit', methods=['POST'])
-def submit():
-    if request.method == 'POST':
-        comparePitches(request.form['leftpitch'], request.form['rightpitch'])
-
-    #update config
-    #update firmware
-
-    return
 
 '''
 
