@@ -12,8 +12,10 @@ def hello():
 
 @app.route('/submit', methods=['POST'])
 def submit():
-    #if request.method == 'POST':
-    return comparePitches(request.form['leftpitch'], request.form['rightpitch'])
+    leftPitch  = request.form['leftpitch']
+    rightPitch = request.form['rightpitch']
+
+    pitches = ('1.6', '2.0', '2.5', '4.0')
 
     #update config
     #update firmware
@@ -36,46 +38,10 @@ def updateFirmware(mac, firmwareFile):
     }
     requests.request("POST", url, data=dumps(payload), headers=headers)
 
-    return
+    #return
 
-#@app.route('/newdims')
-def comparePitches(leftPitch, rightPitch):
-
-    currentDimensions = getCurrentDimensions()
-
-    pitchDimensions = {
-        '1.6': {
-            'height': 216,
-            'width': 192
-        },
-        '2.0': {
-            'height': 180,
-            'width': 160
-        },
-        '2.5': {
-            'height': 144,
-            'width': 128
-        },
-        '4.0': {
-            'height': 90,
-            'width': 80
-        }
-    }
-
-    newDimensions = {}
-    newDimensions['left'] = pitchDimensions[leftPitch]
-    newDimensions['right'] = pitchDimensions[rightPitch]
-
-    #macLeft =
-    #macRight =
-
-    if newDimensions['left']['height'] == currentDimensions['left']['height']:
-        updateFirmware(currentDimensions["left"]["mac"])
-
-    return dumps(newDimensions)
-
-@app.route('/config')
-def getCurrentDimensions():
+@app.route('/modules')
+def get_modules():
     response = requests.get('http://10.0.0.3/api/modules').json()
 
     moduleA = response['data'][0]['attributes']
