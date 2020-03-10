@@ -83,17 +83,24 @@ def getCurrentDimensions():
 
     modules = {}
 
-    if moduleA['offset']['x'] < moduleB['offset']['x']:
-        modules['left'] = moduleA['size']
-        modules['left']['mac'] = moduleA['mac']
-        modules['right'] = moduleB['size']
-        modules['right']['mac'] = moduleB['mac']
+    pitchDimensions = {
+        192: 1.6,
+        160: 2.0,
+        128: 2.5,
+         80: 4.0
+    }
 
-    else:
-        modules['left'] = moduleB['size']
-        modules['left']['mac'] = moduleB['mac']
-        modules['right'] = moduleA['size']
-        modules['right']['mac'] = moduleA['mac']
+    if moduleA['offset']['x'] < moduleB['offset']['x']:
+        modules['left'] = {
+            'pitch': pitchDimensions[moduleA['size']['width']],
+            'mac': moduleA['mac']
+        }
+        modules['right'] = {
+            'pitch': pitchDimensions[moduleB['size']['width']],
+            'mac': moduleB['mac']
+        }
+    #else:
+        #TODO opposite complete
 
     return modules
 
