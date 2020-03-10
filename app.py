@@ -17,13 +17,26 @@ def submit():
 
     pitches = ('1.6', '2.0', '2.5', '4.0')
 
-    #update config
-    #update firmware
+    if (leftPitch not in pitches) or (rightPitch not in pitches):
+        return "invalid request parameter"
+
+    modules = get_modules()
+    #return modules
+    if leftPitch == str(modules['left']['pitch']):
+        #return 'left pitch matched'
+        return update_firmware(modules["left"])
+    if rightPitch == str(modules['right']['pitch']):
+        return 'right pitch matched'
+        #return update_firmware(modules['right']['mac'])
+    return 'program finished'
+
 
     #return
 
 
-def updateFirmware(mac, firmwareFile):
+def update_firmware(module):
+    #return "in firm ware update"
+    #return module
     #TODO read token from config file not committed to GIT
     ip  = "10.0.0.3"
     url = 'http://' + ip + '/api/devices?command=update-firmware'
