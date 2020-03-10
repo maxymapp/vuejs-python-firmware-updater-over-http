@@ -20,24 +20,28 @@ def submit():
 
     #return
 
-@app.route('/config')
-def getConfig():
-    r = requests.get('http://10.0.0.3/api/modules')
-    rdata = r.json()
 
-    sizes = {}
-    sizes['left'] = rdata['data'][1]['attributes']['size']
-    sizes['right'] = rdata['data'][0]['attributes']['size']
+def updateFirmware(mac, firmwareFile):
+    #TODO read token from config file not committed to GIT
+    ip  = "10.0.0.3"
+    url = 'http://' + ip + '/api/devices?command=update-firmware'
 
-    return sizes
+    payload = {
+        "filename": firmwareFile,
+        "macs": mac,
+    }
+    headers = {
+        'Content-Type': "application/json",
+        #'Authorization': "Bearer " + token
+    }
+    requests.request("POST", url, data=dumps(payload), headers=headers)
+
+    return
 
 #@app.route('/newdims')
 def comparePitches(leftPitch, rightPitch):
-    # extract selected pitch from requests
-    # transform passed pitch to pixel dimensions
-    # read current config
-    # compare dimensions
-    config = getConfig()
+
+    currentDimensions = getCurrentDimensions()
 
     pitchDimensions = {
         '1.6': {
@@ -62,10 +66,36 @@ def comparePitches(leftPitch, rightPitch):
     newDimensions['left'] = pitchDimensions[leftPitch]
     newDimensions['right'] = pitchDimensions[rightPitch]
 
-    #if newDimensions['left'] == config['left']
+    #macLeft =
+    #macRight =
+
+    if newDimensions['left']['height'] == currentDimensions['left']['height']:
+        updateFirmware(currentDimensions["left"]["mac"])
+
     return dumps(newDimensions)
 
+@app.route('/config')
+def getCurrentDimensions():
+    response = requests.get('http://10.0.0.3/api/modules').json()
 
+    moduleA = response['data'][0]['attributes']
+    moduleB = response['data'][1]['attributes']
+
+    modules = {}
+
+    if moduleA['offset']['x'] < moduleB['offset']['x']:
+        modules['left'] = moduleA['size']
+        modules['left']['mac'] = moduleA['mac']
+        modules['right'] = moduleB['size']
+        modules['right']['mac'] = moduleB['mac']
+
+    else:
+        modules['left'] = moduleB['size']
+        modules['left']['mac'] = moduleB['mac']
+        modules['right'] = moduleA['size']
+        modules['right']['mac'] = moduleA['mac']
+
+    return modules
 
 '''
 
