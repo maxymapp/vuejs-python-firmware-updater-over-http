@@ -13,42 +13,35 @@ def hello():
 
 @app.route('/submit', methods=['POST'])
 def submit():
-    leftPitch  = request.form['leftpitch']
-    rightPitch = request.form['rightpitch']
+    left_pitch  = request.form['leftpitch']
+    right_pitch = request.form['rightpitch']
 
-    pitches = app.config["PITCHES"]
-    if (leftPitch not in pitches) or (rightPitch not in pitches):
+    pitches = app.config['PITCHES']
+
+    if (left_pitch not in pitches) or (right_pitch not in pitches):
         return "invalid request parameter"
 
     modules = get_modules()
     #return modules
 
-    if leftPitch != str(modules['left']['pitch']):
+    if left_pitch != str(modules['left']['pitch']):
         #return 'left pitch requires update'
-        return update_firmware(modules["left"])
-    if rightPitch != str(modules['right']['pitch']):
+        return update_firmware(modules['left']['mac'], left_pitch)
+    if right_pitch != str(modules['right']['pitch']):
         #return 'right pitch requires update'
-        return update_firmware(modules['right'])
+        return update_firmware(modules['right']['mac'], right_pitch)
     return 'program finished'
 
-
-    #return
-
 @app.route('/firm')
-def update_firmware(module):
-    #return "in firm ware update"
-    #return module
-
-    ip = app.config["IP_ADDRESS"]
-    auth_token = app.config["AUTH_TOKEN"]
+def update_firmware(mac, pitch):
+    ip  = app.config["IP_ADDRESS"]
     url = 'http://' + ip + '/api/devices?command=update-firmware'
-
-    #response = requests.get('http://' + ip + '/api/modules').json()
+    auth_token = app.config["AUTH_TOKEN"]
 
     firmware_path = app.config["FIRMWARE_PATH"]
     #return dumps(firmware_path)
 
-    firmware_file_name = app.config["FIRMWARE_FILES"][module["pitch"]]
+    firmware_file_name = app.config["FIRMWARE_FILES"][pitch]
     #return dumps(firmware_file_name)
 
     firmware_file = firmware_path + firmware_file_name
@@ -56,15 +49,14 @@ def update_firmware(module):
 
     payload = {
         "filename": firmware_file,
-        "mac": [module['mac']],
+        "mac": [mac]
     }
-    #return dumps(payload)
 
     headers = {
         'Content-Type': "multipart/form-data",
         'Authorization': "Bearer " + auth_token
     }
-    response = requests.request("POST", url, data=dumps(payload), headers=headers)
+    response = requests.post(url, files=dict(payload))
 
     return response.status_code
 
