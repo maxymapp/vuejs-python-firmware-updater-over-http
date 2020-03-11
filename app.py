@@ -65,24 +65,27 @@ def get_modules():
     ip = app.config["IP_ADDRESS"]
     response = requests.get('http://' + ip + '/api/modules').json()
 
-    moduleA = response['data'][0]['attributes']
-    moduleB = response['data'][1]['attributes']
+    module_a = response['data'][0]['attributes']
+    module_b = response['data'][1]['attributes']
+
+    if module_a['offset']['x'] < module_b['offset']['x']:
+        module_a_side = 'left'
+        module_b_side = 'right'
+    else:
+        module_a_side = 'right'
+        module_b_side = 'left'
 
     modules = {}
+    pitch_dimensions = app.config["PIXEL_TO_PITCH"]
 
-    pitchDimensions = app.config["PIXEL_TO_PITCH"]
-
-    if moduleA['offset']['x'] < moduleB['offset']['x']:
-        modules['left'] = {
-            'pitch': pitchDimensions[moduleA['size']['width']],
-            'mac': moduleA['mac']
-        }
-        modules['right'] = {
-            'pitch': pitchDimensions[moduleB['size']['width']],
-            'mac': moduleB['mac']
-        }
-    #else:
-        #TODO opposite complete
+    modules[module_a_side] = {
+        'pitch': pitch_dimensions[module_a['size']['width']],
+        'mac': module_a['mac']
+    }
+    modules[module_b_side] = {
+        'pitch': pitch_dimensions[module_b['size']['width']],
+        'mac': module_b['mac']
+    }
 
     return modules
 
