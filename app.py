@@ -1,5 +1,6 @@
 import cgi, requests, os, pycurl, array, uuid, re
 from urllib.parse import urlencode, quote_plus
+from requests_toolbelt.multipart.encoder import MultipartEncoder
 from pprint import pprint
 
 from flask import Flask, render_template, request, jsonify
@@ -36,41 +37,30 @@ def submit():
 #@app.route('/firm')
 def update_firmware(mac, pitch):
 
-    ip  = app.config["IP_ADDRESS"]
-    url = 'http://' + ip + '/api/devices?command=update-firmware'
-    auth_token = app.config["AUTH_TOKEN"]
-
-    firmware_path = app.config["FIRMWARE_PATH"]
     #return (firmware_path)
     firmware_file_name = app.config["FIRMWARE_FILES"][pitch]
-    #return (firmware_file_name)
+    firmware_file_name_no_ext = re.sub('\.d3$', '', firmware_file_name)
+    #return firmware_file_name_no_ext
+    firmware_path = app.config["FIRMWARE_PATH"]
     firmware_file = firmware_path + firmware_file_name
     #return (firmware_file)
 
-    firmware_file_name_no_ext = re.sub('\.d3$', '', firmware_file_name)
-    #return firmware_file_name_no_ext
-
-    # post_data = {
-    #     'mac': mac,
-    #     'name': firmware_file_name_no_ext,
-    #     'filename': firmware_file
-    # }
-    # postfields = urlencode(post_data)
-
     boundary = "--" + str(uuid.uuid1().int)
     eol = "\r\n"
-    with open(firmware_file, mode='rb') as file:  # b is important -> binary
-        fileContent = file.read()
 
-    headers = [
-        'Authorization: Bearer ' + auth_token,
-        'Content-Type: multipart/form-data;boundary=' + boundary,
-        'Content-Disposition: form-data; name="mac"' + eol + mac,
-        'Content-Disposition: form-data; name="' + firmware_file_name_no_ext + '"; filename="' + dumps(firmware_file) + '"',
-        'Content-Type: application/octet-stream',
-        fileContent
-    ]
-    return headers
+    auth_token = app.config["AUTH_TOKEN"]
+    # headers = [
+    #     'Authorization: Bearer ' + auth_token,
+    #     'Content-Type: multipart/form-data;boundary=' + boundary,
+    #     'Content-Disposition: form-data; name="mac"' + eol + mac,
+    #     'Content-Disposition: form-data; name="' + firmware_file_name_no_ext + '"; filename="' + dumps(firmware_file) + '"',
+    #     'Content-Type: application/octet-stream'
+    # ]
+
+    #return headers
+    mp_encoder = MultipartEncoder(
+        fields={
+            'mac': mac,
 
     curl = pycurl.Curl()
     curl.setopt(curl.URL, url)
