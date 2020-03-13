@@ -1,4 +1,5 @@
-import cgi, requests, os
+import cgi, requests, os, pycurl, array, uuid, re
+from urllib.parse import urlencode, quote_plus
 from pprint import pprint
 
 from flask import Flask, render_template, request, jsonify
@@ -26,39 +27,73 @@ def submit():
 
     if left_pitch != str(modules['left']['pitch']):
         #return 'left pitch requires update'
-        update_firmware(modules['left']['mac'], left_pitch)
+        return dumps(update_firmware(modules['left']['mac'], left_pitch))
     if right_pitch != str(modules['right']['pitch']):
-        #return 'right pitch requires update'
-        update_firmware(modules['right']['mac'], right_pitch)
+        return 'right pitch requires update'
+        return update_firmware(modules['right']['mac'], right_pitch)
     return 'program finished'
 
-@app.route('/firm')
+#@app.route('/firm')
 def update_firmware(mac, pitch):
+
     ip  = app.config["IP_ADDRESS"]
     url = 'http://' + ip + '/api/devices?command=update-firmware'
     auth_token = app.config["AUTH_TOKEN"]
 
     firmware_path = app.config["FIRMWARE_PATH"]
-    #return dumps(firmware_path)
-
+    #return (firmware_path)
     firmware_file_name = app.config["FIRMWARE_FILES"][pitch]
-    #return dumps(firmware_file_name)
-
+    #return (firmware_file_name)
     firmware_file = firmware_path + firmware_file_name
-    #return dumps(firmware_file)
+    #return (firmware_file)
 
-    payload = {
-        "filename": firmware_file,
-        "mac": [mac]
-    }
+    firmware_file_name_no_ext = re.sub('\.d3$', '', firmware_file_name)
+    #return firmware_file_name_no_ext
 
-    headers = {
-        'Content-Type': "multipart/form-data",
-        'Authorization': "Bearer " + auth_token
-    }
-    response = requests.post(url, files=dict(payload))
+    # post_data = {
+    #     'mac': mac,
+    #     'name': firmware_file_name_no_ext,
+    #     'filename': firmware_file
+    # }
+    # postfields = urlencode(post_data)
 
-    return response.status_code
+    boundary = "--" + str(uuid.uuid1().int)
+    eol = "\r\n"
+    with open(firmware_file, mode='rb') as file:  # b is important -> binary
+        fileContent = file.read()
+
+    headers = [
+        'Authorization: Bearer ' + auth_token,
+        'Content-Type: multipart/form-data;boundary=' + boundary,
+        'Content-Disposition: form-data; name="mac"' + eol + mac,
+        'Content-Disposition: form-data; name="' + firmware_file_name_no_ext + '"; filename="' + dumps(firmware_file) + '"',
+        'Content-Type: application/octet-stream',
+        fileContent
+    ]
+    return headers
+
+    curl = pycurl.Curl()
+    curl.setopt(curl.URL, url)
+    curl.setopt(pycurl.HTTPHEADER, headers)
+    #curl.setopt(pycurl.POSTFIELDS, postfields)
+    #curl.setopt(pycurl.CUSTOMREQUEST, 'POST')
+
+    curl.perform()
+    curl.close()
+
+    # curl.setopt(curl.HTTPPOST, [
+    #     ('fileupload', (
+    #
+    #         # Upload the contents of the file
+    #         curl.FORM_FILE, '/Users/mkulikovskiy/Documents/DemoFirmware/TCO4_0_60Hz_Internal.d3',
+    #         # Specify a file name of your choice
+    #         curl.FORM_FILENAME, 'TCO4_0_60Hz_Internal.d3',
+    #         # Specify a different content type of upload
+    #         curl.FORM_CONTENTTYPE, 'application/octet-stream',
+    #     )),
+    # ])
+
+    return
 
 @app.route('/modules')
 def get_modules():
