@@ -27,9 +27,9 @@ def submit():
 
     if left_pitch != str(modules['left']['pitch']):
         #return 'left pitch requires update'
-        return dumps(update_firmware(modules['left']['mac'], left_pitch))
+        return update_firmware(modules['left']['mac'], left_pitch)
     if right_pitch != str(modules['right']['pitch']):
-        return 'right pitch requires update'
+        #return 'right pitch requires update'
         return update_firmware(modules['right']['mac'], right_pitch)
     return 'program finished'
 
