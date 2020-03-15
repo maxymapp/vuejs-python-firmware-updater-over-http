@@ -1,8 +1,7 @@
-import cgi, requests, os, pycurl, array, uuid, re
+import cgi, requests, os, pycurl, array, uuid, re, base64
 from urllib.parse import urlencode, quote_plus
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 from pprint import pprint
-
 from flask import Flask, render_template, request, jsonify
 from flask.json import dumps
 
@@ -27,28 +26,31 @@ def submit():
     #return modules
 
     if left_pitch != str(modules['left']['pitch']):
-        #return 'left pitch requires update'
-        return update_firmware(modules['left']['mac'], left_pitch)
+        return 'left pitch requires update'
+        # return update_firmware(modules['left']['mac'], left_pitch)
     if right_pitch != str(modules['right']['pitch']):
-        #return 'right pitch requires update'
-        return update_firmware(modules['right']['mac'], right_pitch)
+        return 'right pitch requires update'
+        # return update_firmware(modules['right']['mac'], right_pitch)
     return 'program finished'
 
-#@app.route('/firm')
-def update_firmware(mac, pitch):
-
-    #return (firmware_path)
+@app.route('/firm')
+# def update_firmware(mac, pitch):
+def update_firmware():
+    pitch = '4.0'
     firmware_file_name = app.config["FIRMWARE_FILES"][pitch]
     firmware_file_name_no_ext = re.sub('\.d3$', '', firmware_file_name)
-    #return firmware_file_name_no_ext
+    # return firmware_file_name
     firmware_path = app.config["FIRMWARE_PATH"]
+    # return (firmware_path)
     firmware_file = firmware_path + firmware_file_name
-    #return (firmware_file)
+    # return (firmware_file)
 
     boundary = "--" + str(uuid.uuid1().int)
     eol = "\r\n"
 
     auth_token = app.config["AUTH_TOKEN"]
+    url = 'http://' + app.config["IP_ADDRESS"] + '/api/devices?command=update-firmware'
+
     # headers = [
     #     'Authorization: Bearer ' + auth_token,
     #     'Content-Type: multipart/form-data;boundary=' + boundary,
@@ -56,39 +58,20 @@ def update_firmware(mac, pitch):
     #     'Content-Disposition: form-data; name="' + firmware_file_name_no_ext + '"; filename="' + dumps(firmware_file) + '"',
     #     'Content-Type: application/octet-stream'
     # ]
-
     #return headers
-    mp_encoder = MultipartEncoder(
-        fields={
-            'mac': mac,
 
-    curl = pycurl.Curl()
-    curl.setopt(curl.URL, url)
-    curl.setopt(pycurl.HTTPHEADER, headers)
-    #curl.setopt(pycurl.POSTFIELDS, postfields)
-    #curl.setopt(pycurl.CUSTOMREQUEST, 'POST')
-
-    curl.perform()
-    curl.close()
-
-    # curl.setopt(curl.HTTPPOST, [
-    #     ('fileupload', (
-    #
-    #         # Upload the contents of the file
-    #         curl.FORM_FILE, '/Users/mkulikovskiy/Documents/DemoFirmware/TCO4_0_60Hz_Internal.d3',
-    #         # Specify a file name of your choice
-    #         curl.FORM_FILENAME, 'TCO4_0_60Hz_Internal.d3',
-    #         # Specify a different content type of upload
-    #         curl.FORM_CONTENTTYPE, 'application/octet-stream',
-    #     )),
-    # ])
-
-    return
+    fileContent = open(firmware_file, mode='rb').read()
+    # return fileContent
+    payload_content = base64.b64encode(fileContent)
+    return payload_content
 
 @app.route('/modules')
 def get_modules():
     ip = app.config["IP_ADDRESS"]
-    response = requests.get('http://' + ip + '/api/modules').json()
+    # TODO pull from /api/devices to get correct dimensions and pitch
+    return 'pull from /api/devices'
+    api_route = "/api/devices"
+    response = requests.get('http://' + ip + api_route).json()
 
     module_a = response['data'][0]['attributes']
     module_b = response['data'][1]['attributes']
@@ -104,17 +87,15 @@ def get_modules():
     pitch_dimensions = app.config["PIXEL_TO_PITCH"]
 
     modules[module_a_side] = {
-        'pitch': pitch_dimensions[module_a['size']['width']],
+        #'pitch': pitch_dimensions[module_a['size']['width']],
         'mac': module_a['mac']
     }
     modules[module_b_side] = {
-        'pitch': pitch_dimensions[module_b['size']['width']],
+        #'pitch': pitch_dimensions[module_b['size']['width']],
         'mac': module_b['mac']
     }
 
     return modules
-
-
 
 
 
