@@ -65,6 +65,43 @@ def update_firmware():
     payload_content = base64.b64encode(fileContent)
     return payload_content
 
+@app.route('/reboot-devices')
+def reboot_devices(macs):
+    url =  '/api/devices?command=reboot'
+    return 'rebooting macs'
+
+#enables video server
+@app.route('/enable-video-server')
+def enable_video_server():
+    #TODO define URL
+    return 'enabling video server'
+
+#patching modules with new dimensions
+@app.route('/patch-video-server')
+def patch_video_server():
+    url = '/api/video-servers/0'
+    http_method = 'PATCH'
+    return 'patching modules(offset/wid/hight)'
+
+#Restarts the controller to apply any changes made to the configuration.
+@app.route('/restart-controller')
+def restart_controller():
+    url = '/api/controllers/0?command=restart'
+    http_method = 'POST'
+    return "restarting the controller"
+
+#Patch layouts for left/right
+@app.route('/patch-layouts')
+def patch_layouts():
+    #TODO define URL
+    return 'patching layouts'
+
+#Restarting the Scheduler.
+@app.route('/restart-scheduler')
+def restart_scheduler():
+    url = '/api/schedulers/0?command=restart'
+    return "Restarting the Scheduler."
+
 @app.route('/modules')
 def get_modules():
     ip = app.config["IP_ADDRESS"]
