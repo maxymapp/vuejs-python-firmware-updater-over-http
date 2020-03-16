@@ -70,12 +70,6 @@ def reboot_devices(macs):
     url =  '/api/devices?command=reboot'
     return 'rebooting macs'
 
-#enables video server
-@app.route('/enable-video-server')
-def enable_video_server():
-    #TODO define URL
-    return 'enabling video server'
-
 #patching modules with new dimensions
 @app.route('/patch-video-server')
 def patch_video_server():
