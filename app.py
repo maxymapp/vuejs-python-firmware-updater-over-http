@@ -67,7 +67,9 @@ def update_firmware():
 
 @app.route('/reboot-devices')
 def reboot_devices(macs):
-    url =  '/api/devices?command=reboot'
+    url = '/api/devices?command=reboot'
+    headers = {'Authorization': 'Bearer ' + app.config["AUTH_TOKEN"]}
+    r = requests.post(url, data = {'ids':macs}, headers=headers)
     return 'rebooting macs'
 
 #patching modules with new dimensions
@@ -81,7 +83,9 @@ def patch_video_server():
 @app.route('/restart-controller')
 def restart_controller():
     url = '/api/controllers/0?command=restart'
-    http_method = 'POST'
+    headers = {'Authorization': 'Bearer ' + app.config["AUTH_TOKEN"]}
+    r = requests.post(url, headers=headers)
+
     return "restarting the controller"
 
 #Patch layouts for left/right
