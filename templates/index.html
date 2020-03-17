@@ -8,15 +8,73 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <!-- <link rel="stylesheet" src="../styles/style.css"> -->
-    <title>Pitch Updater</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+  <script>
+      window.onload = function () {
+        var app = new Vue({
+            el: '#app',
+            data: {
+                leftPitch: null,
+                rightPitch: null,
+                message: 'Hello Vue!',
+                files: null
+            },
+            mounted() {
+                {#this.getFirmwareFiles()#}
+            },
+            methods: {
+                getFirmwareFiles: function() {
+                    self = this;
+                    axios.get('/firmware-files')
+                      .then(function (response) {
+                        Vue.set(self, "files", response.data);
+                        console.log(response.data);
+                      })
+                      .catch(function (error) {
+                        // handle error
+                        console.log(error);
+                      })
+                      .then(function () {
+                        // always executed
+                      });
+                },
+                updateFirmware: function () {
+                    {#let self = this;#}
+                    mac = "00:18:B7:89:45:40";
+                    let data = new FormData();
+                    data.append('file', this.files);
+                    data.append('ids', mac);
+                    {#this.set('isFirmwareUpdating', true);#}
+
+                    axios.post('http://10.0.0.3/api/devices?command=update-firmware', data)
+                    .then(function (response) {
+                        console.log(response)
+
+                    }).catch(function (error) {
+                        console.log(error)
+
+                    })
+                },
+
+            }
+        });
+    };
+  </script>
   </head>
   <body>
-    <div class="container">
-        <h3>Select pitch size</h3>
-        <form action="{{ url_for('submit') }}" method="post" formtarget="_blank">
+    <div id="app" class="container">
+        <h4 class="text-center">Select pitch size</h4>
             <div class="row">
-                <div class="col-sm-6">
-                    <h4>Left</h4>
+
+                <div class="col-sm-2">
+                    {{ message }}
+                </div>
+
+                <div class="col-sm-3">
+                    <h5>Left</h5>
                     <div class="form-check">
                       <input class="form-check-input" type="radio" name="leftpitch" id="left_1.6" value="1.6" checked>
                       <label class="form-check-label" for="left_1.6">
@@ -43,8 +101,8 @@
                     </div>
                 </div>
 
-                <div class="col-sm-6">
-                    <h4>Right</h4>
+                <div class="col-sm-3">
+                    <h5>Right</h5>
                     <div class="form-check">
                       <input class="form-check-input" type="radio" name="rightpitch" id="right_1.6" value="1.6" checked>
                       <label class="form-check-label" for="right_1.6">
@@ -71,8 +129,10 @@
                     </div>
                 </div>
             </div>
-            <button type="submit" class="btn btn-primary">Update Pitch</button>
-        </form>
+
+            <button v-on:click="this.getFirmwareFiles" class="btn btn-primary">get firmware</button>
+
+            <button v-on:click="this.updateFirmware" class="btn btn-secondary">update firmware</button>
 
     </div>
 

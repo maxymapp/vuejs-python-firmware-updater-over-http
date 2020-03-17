@@ -33,17 +33,32 @@ def submit():
         # return update_firmware(modules['right']['mac'], right_pitch)
     return 'program finished'
 
+@app.route('/firmware-files')
+def get_firmware_files():
+    firmware_file_names = app.config["FIRMWARE_FILES"]
+    # return firmware_file_names
+
+    firmware_path = app.config["FIRMWARE_PATH"]
+    firmware_files = []
+
+
+    fileContent = open(firmware_path + app.config["FF"], 'rb').read()
+    return fileContent
+
+    #     firmware_files.append(ff)
+    #
+    #     # firmware_files.append(open(firmware_path + ff, mode='rb').read())
+    #
+    # return jsonify(firmware_files)
+    # #TODO return tuple/dict/ list
+
+    # payload_content = base64.b64encode(fileContent)
+    # return payload_content
+
 @app.route('/firm')
 # def update_firmware(mac, pitch):
 def update_firmware():
-    pitch = '4.0'
-    firmware_file_name = app.config["FIRMWARE_FILES"][pitch]
-    firmware_file_name_no_ext = re.sub('\.d3$', '', firmware_file_name)
-    # return firmware_file_name
-    firmware_path = app.config["FIRMWARE_PATH"]
-    # return (firmware_path)
-    firmware_file = firmware_path + firmware_file_name
-    # return (firmware_file)
+
 
     boundary = "--" + str(uuid.uuid1().int)
     eol = "\r\n"
@@ -60,10 +75,7 @@ def update_firmware():
     # ]
     #return headers
 
-    fileContent = open(firmware_file, mode='rb').read()
-    # return fileContent
-    payload_content = base64.b64encode(fileContent)
-    return payload_content
+
 
 @app.route('/reboot-devices')
 def reboot_devices(macs):
