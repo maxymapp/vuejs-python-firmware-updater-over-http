@@ -33,49 +33,37 @@ def submit():
         # return update_firmware(modules['right']['mac'], right_pitch)
     return 'program finished'
 
-@app.route('/firmware-files')
-def get_firmware_files():
-    firmware_file_names = app.config["FIRMWARE_FILES"]
-    # return firmware_file_names
-
-    firmware_path = app.config["FIRMWARE_PATH"]
-    firmware_files = []
-
-
-    fileContent = open(firmware_path + app.config["FF"], 'rb').read()
-    return fileContent
-
-    #     firmware_files.append(ff)
-    #
-    #     # firmware_files.append(open(firmware_path + ff, mode='rb').read())
-    #
-    # return jsonify(firmware_files)
-    # #TODO return tuple/dict/ list
-
-    # payload_content = base64.b64encode(fileContent)
-    # return payload_content
-
 @app.route('/firm')
 # def update_firmware(mac, pitch):
 def update_firmware():
+    firmware_file_names = app.config["FIRMWARE_FILES"]
+    # return dumps(firmware_file_names)
 
+    firmware_path = app.config["FIRMWARE_PATH"]
+    fw = firmware_path + app.config["FF"]
+    fileContent = open(fw, 'rb').read()
 
-    boundary = "--" + str(uuid.uuid1().int)
-    eol = "\r\n"
+    mac = "00:18:B7:89:45:78"
+
+    # "mac": "00:18:B7:09:45:40"
+    # "mac": "00:18:B7:08:07:06",
 
     auth_token = app.config["AUTH_TOKEN"]
     url = 'http://' + app.config["IP_ADDRESS"] + '/api/devices?command=update-firmware'
 
-    # headers = [
-    #     'Authorization: Bearer ' + auth_token,
-    #     'Content-Type: multipart/form-data;boundary=' + boundary,
-    #     'Content-Disposition: form-data; name="mac"' + eol + mac,
-    #     'Content-Disposition: form-data; name="' + firmware_file_name_no_ext + '"; filename="' + dumps(firmware_file) + '"',
-    #     'Content-Type: application/octet-stream'
-    # ]
-    #return headers
-
-
+    #MultipartEncoder explained in https://stackoverflow.com/a/12385661
+    mp_encoder = MultipartEncoder(
+        fields={
+            'ids': mac,
+            'file': (app.config["FF"], open(fw, 'rb'), 'application/octet-stream'),
+        }
+    )
+    r = requests.post(
+        url,
+        data=mp_encoder,
+        headers={'Content-Type': mp_encoder.content_type, 'Authorization' : 'Bearer ' + auth_token}
+    )
+    return r.content
 
 @app.route('/reboot-devices')
 def reboot_devices(macs):
