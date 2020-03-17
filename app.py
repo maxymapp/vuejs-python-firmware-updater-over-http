@@ -22,8 +22,8 @@ def submit():
     if (left_pitch not in pitches) or (right_pitch not in pitches):
         return "invalid request parameter"
 
-    modules = get_modules()
-    #return modules
+    modules = get_modules(left_pitch, right_pitch)
+    return modules
 
     if left_pitch != str(modules['left']['pitch']):
         return 'left pitch requires update'
@@ -101,15 +101,27 @@ def restart_scheduler():
     return "Restarting the Scheduler."
 
 @app.route('/modules')
-def get_modules():
+def get_modules(left_pitch, right_pitch):
     ip = app.config["IP_ADDRESS"]
-    # TODO pull from /api/devices to get correct dimensions and pitch
-    return 'pull from /api/devices'
+
     api_route = "/api/devices"
     response = requests.get('http://' + ip + api_route).json()
+    # return dumps(response['data'])
 
-    module_a = response['data'][0]['attributes']
-    module_b = response['data'][1]['attributes']
+    panel_ids = app.config["PANEL_IDS"]
+    for device in response['data']:
+        device_class = device['attributes']['device-class']
+        # if device_class.startswith('TCO'):
+
+
+    # return dumps(goodids)
+    module_a = response#['data']#[0]#['attributes']
+    return module_a
+    module_b = response['data'][1]#['attributes']
+    return module_b
+    module_c = response['data'][2]['attributes']
+    return module_c
+
 
     if module_a['offset']['x'] < module_b['offset']['x']:
         module_a_side = 'left'
