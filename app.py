@@ -14,39 +14,30 @@ def hello():
 
 @app.route('/submit', methods=['POST'])
 def submit():
-    left_pitch  = request.form['left_pitch']
-    right_pitch = request.form['right_pitch']
+    left_pitch  = float(request.form['left-pitch'])
+    right_pitch = float(request.form['right-pitch'])
 
-    pitches = app.config['PITCHES']
-
-    if (left_pitch not in pitches) or (right_pitch not in pitches):
+    if (left_pitch not in app.config['PITCH_SIZES']) or (right_pitch not in app.config['PITCH_SIZES']):
         return "invalid request parameter"
 
-    modules = get_modules(left_pitch, right_pitch)
-    return modules
+    modules = get_modules_to_update(left_pitch, right_pitch)
+    # return "nothing tuo udpares"
+    # return dumps(modules)
+    if modules != []:
+        for module in modules:
+            return update_firmware(module)
 
-    if left_pitch != str(modules['left']['pitch']):
-        return 'left pitch requires update'
-        # return update_firmware(modules['left']['mac'], left_pitch)
-    if right_pitch != str(modules['right']['pitch']):
-        return 'right pitch requires update'
-        # return update_firmware(modules['right']['mac'], right_pitch)
     return 'program finished'
 
 @app.route('/firm')
 # def update_firmware(mac, pitch):
-def update_firmware():
-    firmware_file_names = app.config["FIRMWARE_FILES"]
-    # return dumps(firmware_file_names)
+def update_firmware(module):
+    # return dumps(module)
 
     firmware_path = app.config["FIRMWARE_PATH"]
-    fw = firmware_path + app.config["FF"]
-    fileContent = open(fw, 'rb').read()
-
-    mac = "00:18:B7:89:45:78"
-
-    # "mac": "00:18:B7:09:45:40"
-    # "mac": "00:18:B7:08:07:06",
+    firmware_file = app.config["FIRMWARE_FILES"][module['pitch']]
+    fw = firmware_path + firmware_file
+    # return dumps(fw)
 
     auth_token = app.config["AUTH_TOKEN"]
     url = 'http://' + app.config["IP_ADDRESS"] + '/api/devices?command=update-firmware'
@@ -54,8 +45,8 @@ def update_firmware():
     #MultipartEncoder explained in https://stackoverflow.com/a/12385661
     mp_encoder = MultipartEncoder(
         fields={
-            'ids': mac,
-            'file': (app.config["FF"], open(fw, 'rb'), 'application/octet-stream'),
+            'ids': module['mac'],
+            'file': (firmware_file, open(fw, 'rb'), 'application/octet-stream'),
         }
     )
     r = requests.post(
@@ -101,48 +92,43 @@ def restart_scheduler():
     return "Restarting the Scheduler."
 
 @app.route('/modules')
-def get_modules(left_pitch, right_pitch):
-    ip = app.config["IP_ADDRESS"]
-
-    api_route = "/api/devices"
-    response = requests.get('http://' + ip + api_route).json()
+def get_modules_to_update(left_pitch, right_pitch):
+    response = requests.get('http://' + app.config["IP_ADDRESS"] + "/api/devices").json()
     # return dumps(response['data'])
 
-    panel_ids = app.config["PANEL_IDS"]
+    devices = {}
     for device in response['data']:
         device_class = device['attributes']['device-class']
-        # if device_class.startswith('TCO'):
+        if device_class.startswith('TCO'):
+            mac = device['attributes']['mac']
+            devices[mac] = app.config["DEVICE_CLASS_TO_PITCH"][device_class]
 
+    # return devices
 
-    # return dumps(goodids)
-    module_a = response#['data']#[0]#['attributes']
-    return module_a
-    module_b = response['data'][1]#['attributes']
-    return module_b
-    module_c = response['data'][2]['attributes']
-    return module_c
+    response = requests.get('http://' + app.config["IP_ADDRESS"] + "/api/modules").json()
+    # return dumps(response['data'])
 
+    if len(response['data']) < 2:
+        return "either or both modules are not found"
+    if len(response['data']) > 2:
+        return "more than 2 modules are found"
 
-    if module_a['offset']['x'] < module_b['offset']['x']:
-        module_a_side = 'left'
-        module_b_side = 'right'
-    else:
-        module_a_side = 'right'
-        module_b_side = 'left'
+    modules_to_update = []
+    for module in response['data']:
+        if(module['attributes']['offset']['x'] == 0):
+            mac = module['attributes']['mac']
+            if devices[mac] != float(left_pitch):
+                # return mac
+                modules_to_update.append({'mac': mac, 'pitch': left_pitch})
+                # update_firmware()
+        if (module['attributes']['offset']['x'] > 0):
+            mac = module['attributes']['mac']
+            if devices[mac] != float(right_pitch):
+                # update_firmware()
+                # return mac
+                modules_to_update.append({'mac': mac, 'pitch': right_pitch})
 
-    modules = {}
-    pitch_dimensions = app.config["PIXEL_TO_PITCH"]
-
-    modules[module_a_side] = {
-        #'pitch': pitch_dimensions[module_a['size']['width']],
-        'mac': module_a['mac']
-    }
-    modules[module_b_side] = {
-        #'pitch': pitch_dimensions[module_b['size']['width']],
-        'mac': module_b['mac']
-    }
-
-    return modules
+    return modules_to_update
 
 
 
