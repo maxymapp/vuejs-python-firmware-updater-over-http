@@ -14,8 +14,8 @@ def hello():
 
 @app.route('/submit', methods=['POST'])
 def submit():
-    left_pitch  = request.form['leftpitch']
-    right_pitch = request.form['rightpitch']
+    left_pitch  = request.form['left_pitch']
+    right_pitch = request.form['right_pitch']
 
     pitches = app.config['PITCHES']
 
