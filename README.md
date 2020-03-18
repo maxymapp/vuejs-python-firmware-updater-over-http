@@ -1,5 +1,6 @@
 This is a Flask web app.
 We recommend using the latest version of Python 3. Flask supports Python 3.5 and newer, Python 2.7, and PyPy.
+https://flask.palletsprojects.com/en/1.1.x/installation/#installation
 
 How to launch the app?
 
