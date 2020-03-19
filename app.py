@@ -18,10 +18,11 @@ def submit():
     right_pitch = float(request.form['right-pitch'])
 
     if (left_pitch not in app.config['PITCH_SIZES']) or (right_pitch not in app.config['PITCH_SIZES']):
+        #TODO need frontend error?
         return "invalid request parameter"
 
     modules = get_modules_to_update(left_pitch, right_pitch)
-    # return "nothing tuo udpares"
+    # return "nothing to update"
     # return dumps(modules)
     if modules != []:
         for module in modules:
