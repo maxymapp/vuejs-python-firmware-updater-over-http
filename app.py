@@ -103,12 +103,7 @@ def reboot_devices(macs):
     r = requests.post(url, data = {'ids':macs}, headers=headers)
     return 'rebooting macs'
 
-#patching modules with new dimensions
-@app.route('/patch-video-server')
-def patch_video_server():
-    url = '/api/video-servers/0'
-    http_method = 'PATCH'
-    return 'patching modules(offset/wid/hight)'
+
 
 #Restarts the controller to apply any changes made to the configuration.
 @app.route('/restart-controller')
