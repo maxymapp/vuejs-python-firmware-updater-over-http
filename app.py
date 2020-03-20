@@ -131,7 +131,8 @@ def patch_modules(macs):
 #Patch layouts
 @app.route('/patch-layouts')
 def patch_layouts():
-    #TODO define URL
+    uri = "/api/layouts/0"
+    method = "PATCH"
     return 'patching layouts'
 
 #Restarts the controller to apply any changes made to the configuration.
