@@ -94,7 +94,7 @@ def update_firmware(module):
         data=mp_encoder,
         headers={'Content-Type': mp_encoder.content_type, 'Authorization' : 'Bearer ' + auth_token}
     )
-    return r.content
+    return dumps(r.status_code)
 
 @app.route('/reboot-devices')
 def reboot_devices(macs):
@@ -103,7 +103,36 @@ def reboot_devices(macs):
     r = requests.post(url, data = {'ids':macs}, headers=headers)
     return 'rebooting macs'
 
+#3
+# patch to /api/modules to update the offset and size.  Here is the json for that:
+@app.route('/patch-modules')
+def patch_modules(macs):
+    uri = "/api/modules"
+    method = "PATCH"
+    return "patching modules"
 
+# {
+#   "data": {
+#     "type": "modules",
+#     "id": "69798",
+#     "attributes": {
+#       "offset": {
+#         "x": 1000,
+#         "y": 20
+#       },
+#       "size": {
+# 	"width": 440,
+# 	"height": 280
+#         }
+#     }
+#   }
+# }
+
+#Patch layouts
+@app.route('/patch-layouts')
+def patch_layouts():
+    #TODO define URL
+    return 'patching layouts'
 
 #Restarts the controller to apply any changes made to the configuration.
 @app.route('/restart-controller')
@@ -113,12 +142,6 @@ def restart_controller():
     r = requests.post(url, headers=headers)
 
     return "restarting the controller"
-
-#Patch layouts for left/right
-@app.route('/patch-layouts')
-def patch_layouts():
-    #TODO define URL
-    return 'patching layouts'
 
 #Restarting the Scheduler.
 @app.route('/restart-scheduler')
