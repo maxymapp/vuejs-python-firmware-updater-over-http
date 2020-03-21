@@ -6,71 +6,131 @@
 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 
-{#    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>#}
-{#    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>#}
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+        window.onload = function () {
+            var app = new Vue({
+                el: '#app',
+                data: {
+                    modules: [],
+                    left_pitch: null,
+                    right_pitch: null,
+                    new_left_pitch: null,
+                    new_right_pitch: null,
+                    files: null,
+                    ip: '{{ ip }}'
+                },
+                mounted() {
+                    this.getModules();
+                },
+                methods: {
+                    getModules: function() {
+                        axios.get("{{ url_for('get_modules') }}")
+                            .then((res) => {
+                                this.modules = res.data;
+                            })
+                            .catch((error) => {
+                                console.error("failed to get current pitch");
+
+                                console.error(error);
+                            })
+                    },
+                    updateFirmware: () => {
+                        this.checkIfPitchesChanged();
+                        {#let self = this;#}
+                        mac = "00:18:B7:89:45:40";
+                        let data = new FormData();
+                        data.append('file', this.files);
+                        data.append('ids', mac);
+                        {#this.set('isFirmwareUpdating', true);#}
+
+                        axios.post('http://10.0.0.3/api/devices?command=update-firmware', data)
+                            .then(function (response) {
+                                console.log(response)
+
+                            }).catch(function (error) {
+                            console.log(error)
+
+                        })
+                    },
+                    checkIfPitchesChanged: function() {
+                        {#if(parseFloat(this.new_left_pitch) !== this.left_pitch) {#}
+                        {#    console.log(parseFloat(this.new_left_pitch));#}
+                        {#    console.log(this.left_pitch);#}
+                        {#return;#}
+
+                    }
+
+                }
+            });
+        };
+    </script>
 </head>
 <body>
 <div id="app" class="container">
-    <h4>Select pitch size</h4>
-    <div class="row">
-        <form action="{{ url_for('submit') }}" method="post">
-            <div class="col-sm-3">
-                <h5>Left</h5>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="left-pitch" id="left-pitch-1.6" value="1.6">
-                    <label class="form-check-label" for="left-pitch-1.6">
-                        1.6
-                    </label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="left-pitch" id="left-pitch-2.0" value="2.0">
-                    <label class="form-check-label" for="left-pitch-2.0">
-                        2.0
-                    </label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="left-pitch" id="left-pitch-2.5" value="2.5">
-                    <label class="form-check-label" for="left-pitch-2.5">
-                        2.5
-                    </label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="left-pitch" id="left-pitch-4.0" value="4.0">
-                    <label class="form-check-label" for="left-pitch-4.0">
-                        4.0
-                    </label>
-                </div>
+    <h4 style="margin-top: 2rem">Select pitch size</h4>
+    <div class="row" style="margin-top: 2rem">
+        <div class="col-sm-3">
+            <h5>Left</h5>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" v-model="new_left_pitch" id="new_left_pitch-1.6" value="1.6">
+                <label class="form-check-label" for="new_left_pitch-1.6">
+                    1.6
+                </label>
             </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" v-model="new_left_pitch" id="new_left_pitch-2.0" value="2.0">
+                <label class="form-check-label" for="new_left_pitch-2.0">
+                    2.0
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" v-model="new_left_pitch" id="new_left_pitch-2.5" value="2.5">
+                <label class="form-check-label" for="new_left_pitch-2.5">
+                    2.5
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" v-model="new_left_pitch" id="new_left_pitch-4.0" value="4.0">
+                <label class="form-check-label" for="new_left_pitch-4.0">
+                    4.0
+                </label>
+            </div>
+        </div>
 
-            <div class="col-sm-3">
-                <h5>Right</h5>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="right-pitch" id="right-pitch-1.6" value="1.6">
-                    <label class="form-check-label" for="right-pitch-1.6">
-                        1.6
-                    </label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="right-pitch" id="right-pitch-2.0" value="2.0">
-                    <label class="form-check-label" for="right-pitch-2.0">
-                        2.0
-                    </label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="right-pitch" id="right-pitch-2.5" value="2.5">
-                    <label class="form-check-label" for="right-pitch-2.5">
-                        2.5
-                    </label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="right-pitch" id="right-pitch-4.0" value="4.0">
-                    <label class="form-check-label" for="right-pitch-4.0">
-                        4.0
-                    </label>
-                </div>
+        <div class="col-sm-3">
+            <h5>Right</h5>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" v-model="new_right_pitch" id="new_right_pitch-1.6" value="1.6">
+                <label class="form-check-label" for="new_right_pitch-1.6">
+                    1.6
+                </label>
             </div>
-            <button type="submit" class="btn btn-primary">Update Pitch</button>
-        </form>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" v-model="new_right_pitch" id="new_right_pitch-2.0" value="2.0">
+                <label class="form-check-label" for="new_right_pitch-2.0">
+                    2.0
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" v-model="new_right_pitch" id="new_right_pitch-2.5" value="2.5">
+                <label class="form-check-label" for="new_right_pitch-2.5">
+                    2.5
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" v-model="new_right_pitch" id="new_right_pitch-4.0" value="4.0">
+                <label class="form-check-label" for="new_right_pitch-4.0">
+                    4.0
+                </label>
+            </div>
+        </div>
+
+        <div class="col-sm-3">
+            <button v-if="this.new_left_pitch || this.new_right_pitch" v-on:click="this.updateFirmware" class="btn btn-primary">Update Pitch</button>
+        </div>
     </div>
 </div>
 

@@ -21,20 +21,19 @@ def submit():
         #TODO need frontend error?
         return "invalid request parameter"
 
-    modules = get_modules_to_update(left_pitch, right_pitch)
     # return "nothing to update"
     # return dumps(modules)
-    if modules != []:
-        for module in modules:
-            return update_firmware(module)
+    # if modules != []:
+    #     for module in modules:
+    #         return update_firmware(module)
 
     return 'program finished'
 
 @app.route('/modules')
-def get_modules_to_update(left_pitch, right_pitch):
+def get_modules():
     response = requests.get('http://' + app.config["IP_ADDRESS"] + "/api/devices").json()
-    # return dumps(response['data'])
 
+    #{"00:18:B7:09:45:40": 2.5, "00:18:B7:09:45:78": 2.0}
     devices = {}
     for device in response['data']:
         device_class = device['attributes']['device-class']
@@ -45,29 +44,28 @@ def get_modules_to_update(left_pitch, right_pitch):
     # return devices
 
     response = requests.get('http://' + app.config["IP_ADDRESS"] + "/api/modules").json()
-    # return dumps(response['data'])
 
     if len(response['data']) < 2:
         return "either or both modules are not found"
     if len(response['data']) > 2:
         return "more than 2 modules are found"
 
-    modules_to_update = []
+    modules = {}
     for module in response['data']:
         if(module['attributes']['offset']['x'] == 0):
             mac = module['attributes']['mac']
-            if devices[mac] != float(left_pitch):
-                # return mac
-                modules_to_update.append({'mac': mac, 'pitch': left_pitch})
-                # update_firmware()
+            # if devices[mac] != float(left_pitch):
+                # modules.append({'mac': mac, 'pitch': left_pitch})
+            modules['leftPitch'] = devices[mac]
         if (module['attributes']['offset']['x'] > 0):
             mac = module['attributes']['mac']
-            if devices[mac] != float(right_pitch):
-                # update_firmware()
+            # if devices[mac] != float(right_pitch):
                 # return mac
-                modules_to_update.append({'mac': mac, 'pitch': right_pitch})
+            modules['rightPitch'] = devices[mac]
 
-    return modules_to_update
+            # modules.append({'mac': mac, 'pitch': right_pitch})
+
+    return jsonify(modules)
 
 @app.route('/firm')
 # def update_firmware(mac, pitch):
