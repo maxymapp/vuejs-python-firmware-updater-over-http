@@ -55,25 +55,23 @@ def get_modules():
         if(module['attributes']['offset']['x'] == 0):
             mac = module['attributes']['mac']
             # if devices[mac] != float(left_pitch):
-                # modules.append({'mac': mac, 'pitch': left_pitch})
-            modules['leftPitch'] = devices[mac]
+            # modules['leftPitch'] = str(devices[mac])
+            modules['left'] = {'mac': mac, 'pitch': str(devices[mac])}
         if (module['attributes']['offset']['x'] > 0):
             mac = module['attributes']['mac']
             # if devices[mac] != float(right_pitch):
-                # return mac
-            modules['rightPitch'] = devices[mac]
-
-            # modules.append({'mac': mac, 'pitch': right_pitch})
-
+            # modules['rightPitch'] = str(devices[mac])
+            modules['right'] = {'mac': mac, 'pitch': str(devices[mac])}
+    # return modules
     return jsonify(modules)
 
-@app.route('/firm')
-# def update_firmware(mac, pitch):
-def update_firmware(module):
-    # return dumps(module)
+@app.route('/update-firmware', methods=['POST'])
+def update_firmware():
+    mac = request.form['mac']
+    pitch = request.form['pitch']
 
     firmware_path = app.config["FIRMWARE_PATH"]
-    firmware_file = app.config["FIRMWARE_FILES"][module['pitch']]
+    firmware_file = app.config["FIRMWARE_FILES"][pitch]
     fw = firmware_path + firmware_file
     # return dumps(fw)
 
@@ -83,7 +81,7 @@ def update_firmware(module):
     #MultipartEncoder explained in https://stackoverflow.com/a/12385661
     mp_encoder = MultipartEncoder(
         fields={
-            'ids': module['mac'],
+            'ids': mac,
             'file': (firmware_file, open(fw, 'rb'), 'application/octet-stream'),
         }
     )
@@ -94,9 +92,10 @@ def update_firmware(module):
     )
     return dumps(r.status_code)
 
-@app.route('/reboot-devices')
-def reboot_devices(macs):
-    url = '/api/devices?command=reboot'
+@app.route('/reboot-devices', methods=["POST"])
+def reboot_devices():
+    macs = request.form['mac']
+    url = 'http://' + app.config["IP_ADDRESS"] + '/api/devices?command=reboot'
     headers = {'Authorization': 'Bearer ' + app.config["AUTH_TOKEN"]}
     r = requests.post(url, data = {'ids':macs}, headers=headers)
     return 'rebooting macs'
