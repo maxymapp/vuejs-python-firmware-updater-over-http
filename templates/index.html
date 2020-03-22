@@ -19,6 +19,8 @@
                     {#right_pitch: null,#}
                     new_left_pitch: null,
                     new_right_pitch: null,
+                    pollUpdateInteval: null,
+                    isUpdateInProgress: null
                 },
                 mounted() {
                     this.getModules();
@@ -69,7 +71,9 @@
                             .then(function (response) {
                                 console.log(response)
                                 if(response.status == 200) {
-                                    self.rebootDevices(mac);
+                                    self.isUpdateInProgress = true;
+                                    self.pollUpdateInteval = setInterval(self.pollFirmwareUpdateStatus, 3000); // Time in milliseconds
+
                                 }
 
                             })
@@ -78,17 +82,38 @@
 
                             })
                     },
+                    pollFirmwareUpdateStatus: function() {
+                        self = this;
+
+                        console.log("polling firmware update status.... :");
+                        axios.get("{{ url_for('poll_firmware_update') }}")
+                            .then(function (response) {
+                                var isFinishedStatus = response.data.data[0].attributes["is-finished"];
+                                if(isFinishedStatus) {
+                                    clearInterval(self.pollUpdateInteval);
+                                    self.isUpdateInProgress = false;
+                                }
+
+                                console.log(isFinishedStatus)
+
+                            })
+                            .catch(function (error) {
+                                console.log(error)
+
+                            })
+
+                    },
                     rebootDevices: function(mac) {
                         data = new FormData();
                         data.append('mac', mac);
                         axios.post("{{ url_for('reboot_devices') }}", data)
                             .then(function (response) {
                                 console.log(response);
-                            }
-                                .catch(function(error) {
-                                    console.log(error)
+                            })
+                            .catch(function(error) {
+                                console.log(error)
 
-                                }))
+                            })
 
                     }
                 }//methods close
@@ -154,11 +179,12 @@
                 </label>
             </div>
         </div>
+    </div>
+    <button v-on:click="this.updateButtonHandle" v-if="this.wasNewValueSelected" class="btn btn-primary">Update Pitch</button>
+    <div class="progress">
+        <div v-if="this.isUpdateInProgress" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" style="width: 50%">Update firmware...</div>
+        <div v-if="!this.isUpdateInProgress" class="progress-bar bg-success" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">Firmware updated successfully</div>
 
-        <div class="col-sm-3">
-            <!-- v-if="this.wasNewValueSelected"*/ -->
-            <button v-on:click="this.updateButtonHandle" class="btn btn-primary">Update Pitch</button>
-        </div>
     </div>
 </div>
 

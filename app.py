@@ -92,6 +92,14 @@ def update_firmware():
     )
     return dumps(r.status_code)
 
+@app.route('/poll-firmware-update')
+def poll_firmware_update():
+    url = 'http://' + app.config["IP_ADDRESS"] + "/api/progresses?filter[type]=firmware-update"
+    headers = {'Authorization': 'Bearer ' + app.config["AUTH_TOKEN"]}
+
+    r = requests.get(url, headers=headers)
+    return r.content
+
 @app.route('/reboot-devices', methods=["POST"])
 def reboot_devices():
     macs = request.form['mac']
