@@ -16,6 +16,11 @@
     </style>
 
     <script>
+        if (navigator.onLine) {
+            console.log('online');
+        } else {
+            console.log('offline');
+        }
         window.onload = function () {
             var app = new Vue({
                 el: '#app',
