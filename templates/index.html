@@ -14,7 +14,7 @@
             var app = new Vue({
                 el: '#app',
                 data: {
-                    modules: [],
+                    modules: null,
                     {#left_pitch: null,#}
                     {#right_pitch: null,#}
                     new_left_pitch: null,
@@ -27,7 +27,7 @@
                 },
                 computed: {
                     wasNewValueSelected: function () {
-                        return ((this.new_left_pitch !== this.modules['left']['pitch']) || (this.new_right_pitch !== this.modules['right']['pitch']))
+                        return this.modules? ((this.new_left_pitch !== this.modules['left']['pitch']) || (this.new_right_pitch !== this.modules['right']['pitch'])) : false;
                     },
                     wasLeftPitchChanged: function () {
                         return (this.new_left_pitch !== this.modules['left']['pitch']);
