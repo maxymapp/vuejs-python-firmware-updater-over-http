@@ -47,9 +47,6 @@
                         axios.get("{{ url_for('get_modules') }}")
                             .then((res) => {
                                 this.modules = res.data;
-                                this.new_left_pitch = this.modules['left']['pitch'];
-                                this.new_right_pitch = this.modules['right']['pitch'];
-
                             })
                             .catch((error) => {
                                 console.error("failed to get current pitch");
@@ -122,7 +119,15 @@
                             })
 
                     }
-                }//methods close
+                },
+                watch: {
+                    modules: function(val) {
+                        if(val) {
+                            this.new_left_pitch = val['left']['pitch'];
+                            this.new_right_pitch = val['right']['pitch'];
+                        }
+                    },
+                }
             })}
     </script>
 </head>
