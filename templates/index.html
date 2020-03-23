@@ -55,22 +55,23 @@
                             })
                             .catch((error) => {
                                 console.error("failed to get current pitch");
-
                                 console.error(error);
                             })
                     },
-                    updateButtonHandle: function() {
+                    updateButtonHandle: async function() {
                         if(!this.wasNewValueSelected) {
                             console.log('new value was not selected');
                             return;
                         }
                         if(this.wasLeftPitchChanged)
-                            this.updateFirmware(this.modules['left']['mac'], this.new_left_pitch);
+                            await this.updateFirmware(this.modules['left']['mac'], this.new_left_pitch);
 
                         if(this.wasRightPitchChanged)
-                            this.updateFirmware(this.modules['right']['mac'], this.new_right_pitch);
+                            await this.updateFirmware(this.modules['right']['mac'], this.new_right_pitch);
+
                     },
                     updateFirmware: function(mac, pitch) {
+                        console.log("updating firmware request");
                         let data = new FormData();
                         data.append('mac', mac);
                         data.append('pitch', pitch);
