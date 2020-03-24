@@ -8,6 +8,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
     <style>
         div.col-sm-3 {
@@ -138,7 +139,52 @@
     </script>
 </head>
 <body>
-<div id="app" class="container">
+<div id="app">
+    <div class="option-group">
+        <div class="option-container">
+
+            <input class="option-input" checked id="option-1" type="radio" name="options" />
+            <input class="option-input" id="option-2" type="radio" name="options" />
+
+            <label class="option" for="option-1">
+                <span class="option__indicator"></span>
+                <span class="option__label">
+                    1.6<sub>inches</sub>
+                </span>
+            </label>
+
+            <label class="option" for="option-2">
+                <span class="option__indicator"></span>
+                <span class="option__label">
+                    2.0<sub>inches</sub>
+                </span>
+            </label>
+
+        </div>
+    </div>
+    <div class="option-group">
+        <div class="option-container">
+
+            <input class="option-input" id="option-3" type="radio" name="options" />
+            <input class="option-input" id="option-4" type="radio" name="options" />
+
+            <label class="option" for="option-3">
+                <span class="option__indicator"></span>
+                <span class="option__label">
+                    2.5<sub>inches</sub>
+                </span>
+            </label>
+
+            <label class="option" for="option-4">
+                <span class="option__indicator"></span>
+                <span class="option__label">
+                    4.0<sub>inches</sub>
+                </span>
+            </label>
+
+        </div>
+    </div>
+
     <h4 style="margin: 3rem">Select pitch size</h4>
     <div class="row" style="margin: 3rem">
         <div class="col-sm-3">
