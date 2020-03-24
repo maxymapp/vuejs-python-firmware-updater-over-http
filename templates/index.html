@@ -241,12 +241,16 @@
             </div>
         </div>
     </div>
-    <button v-on:click="this.updateButtonHandle" v-if="this.wasNewValueSelected" class="btn btn-primary">Update Pitch</button>
-    <div class="progress">
-        <div v-if="this.isUpdateInProgress" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" style="width: 50%">Update firmware...</div>
-        <div v-if="!this.isUpdateInProgress" class="progress-bar bg-success" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">Firmware updated successfully</div>
 
-    </div>
+        <div v-if="this.wasNewValueSelected" v-cloak style="margin: 3rem">
+            <div v-if="!this.isUpdateInProgress">
+                <button v-on:click="this.updateButtonHandle" v-if="!this.successNotif" class="btn btn-primary">Update Pitch</button>
+                <div v-if="this.successNotif" class="progress-bar bg-success" role="progressbar" style="width: 100%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">Firmware updated successfully</div>
+            </div>
+            <div v-else class="progress">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"  style="width: 100%;" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" >Updating firmware...</div>
+            </div>
+        </div>
 </div>
 
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->
