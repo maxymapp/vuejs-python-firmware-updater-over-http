@@ -20,15 +20,15 @@ body {
   font-size: 4rem;
   margin: 0.2em auto;
   -webkit-transform: translateZ(0);
-          transform: translateZ(0);
+  transform: translateZ(0);
 }
 .option-container {
   display: -webkit-box;
   display: flex;
   -webkit-box-pack: center;
-          justify-content: center;
+  justify-content: center;
   -webkit-box-align: stretch;
-          align-items: stretch;
+  align-items: stretch;
   width: 120%;
   height: 100%;
   margin: 0 -10%;
@@ -36,7 +36,7 @@ body {
 .option {
   overflow: hidden;
   -webkit-box-flex: 1;
-          flex: 1;
+  flex: 1;
   display: block;
   padding: 0.5em;
   background: #FFF;
@@ -47,22 +47,22 @@ body {
   display: -webkit-box;
   display: flex;
   -webkit-box-pack: end;
-          justify-content: flex-end;
+  justify-content: flex-end;
   -webkit-box-align: start;
-          align-items: flex-start;
+  align-items: flex-start;
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
-          flex-direction: column;
+  flex-direction: column;
   cursor: pointer;
   opacity: 0.5;
   -webkit-transition-duration: 0.8s, 0.6s;
-          transition-duration: 0.8s, 0.6s;
+  transition-duration: 0.8s, 0.6s;
   -webkit-transition-property: opacity, -webkit-transform;
   transition-property: opacity, -webkit-transform;
   transition-property: transform, opacity;
   transition-property: transform, opacity, -webkit-transform;
   -webkit-transition-timing-function: cubic-bezier(0.98, 0, 0.22, 0.98), linear;
-          transition-timing-function: cubic-bezier(0.98, 0, 0.22, 0.98), linear;
+  transition-timing-function: cubic-bezier(0.98, 0, 0.22, 0.98), linear;
   will-change: transform, opacity;
 }
 .option:last-child {
@@ -71,7 +71,7 @@ body {
 .option__indicator {
   display: block;
   -webkit-transform-origin: left bottom;
-          transform-origin: left bottom;
+  transform-origin: left bottom;
   -webkit-transition: inherit;
   transition: inherit;
   will-change: transform;
@@ -95,7 +95,7 @@ body {
 .option__indicator:after {
   background: #64D6EE;
   -webkit-transform: scale(0);
-          transform: scale(0);
+  transform: scale(0);
   -webkit-transition: inherit;
   transition: inherit;
   will-change: transform;
@@ -113,9 +113,9 @@ body {
   font-size: 1.5em;
   font-weight: bold;
   -webkit-transform-origin: left bottom;
-          transform-origin: left bottom;
+  transform-origin: left bottom;
   -webkit-transform: translateX(20%) scale(0.7);
-          transform: translateX(20%) scale(0.7);
+  transform: translateX(20%) scale(0.7);
   -webkit-transition: inherit;
   transition: inherit;
   will-change: transform;
@@ -132,44 +132,44 @@ body {
   border: solid 2px #64D6EE;
   width: 100%;
   -webkit-transform-origin: 0 0;
-          transform-origin: 0 0;
+  transform-origin: 0 0;
   -webkit-transform: scaleX(0.2);
-          transform: scaleX(0.2);
+  transform: scaleX(0.2);
   -webkit-transition: inherit;
   transition: inherit;
   will-change: transform;
 }
 .option:last-child .option__label {
   -webkit-transform: translateX(0%) scale(0.7);
-          transform: translateX(0%) scale(0.7);
+  transform: translateX(0%) scale(0.7);
 }
 .option:last-child .option__indicator {
   -webkit-transform: translateX(-20%);
-          transform: translateX(-20%);
+  transform: translateX(-20%);
 }
 .option-input:checked ~ .option {
   -webkit-transform: translateX(-20%) translateX(0.2em);
-          transform: translateX(-20%) translateX(0.2em);
+  transform: translateX(-20%) translateX(0.2em);
 }
 .option-input:checked ~ .option .option__indicator {
   -webkit-transform: translateX(0%);
-          transform: translateX(0%);
+  transform: translateX(0%);
 }
 .option-input:checked ~ .option .option__label {
   -webkit-transform: translateX(40%) scale(0.7);
-          transform: translateX(40%) scale(0.7);
+  transform: translateX(40%) scale(0.7);
 }
 .option-input:first-child:checked ~ .option {
   -webkit-transform: translateX(20%) translateX(-0.2em);
-          transform: translateX(20%) translateX(-0.2em);
+  transform: translateX(20%) translateX(-0.2em);
 }
 .option-input:first-child:checked ~ .option .option__indicator {
   -webkit-transform: translateX(-40%);
-          transform: translateX(-40%);
+  transform: translateX(-40%);
 }
 .option-input:first-child:checked ~ .option .option__label {
   -webkit-transform: translateX(0%) scale(0.7);
-          transform: translateX(0%) scale(0.7);
+  transform: translateX(0%) scale(0.7);
 }
 .option-input:nth-child(1):checked ~ .option:nth-of-type(1),
 .option-input:nth-child(2):checked ~ .option:nth-of-type(2) {
@@ -178,17 +178,17 @@ body {
 .option-input:nth-child(1):checked ~ .option:nth-of-type(1) .option__indicator,
 .option-input:nth-child(2):checked ~ .option:nth-of-type(2) .option__indicator {
   -webkit-transform: translateX(0);
-          transform: translateX(0);
+  transform: translateX(0);
 }
 .option-input:nth-child(1):checked ~ .option:nth-of-type(1) .option__indicator::after,
 .option-input:nth-child(2):checked ~ .option:nth-of-type(2) .option__indicator::after {
   -webkit-transform: scale(1);
-          transform: scale(1);
+  transform: scale(1);
 }
 .option-input:nth-child(1):checked ~ .option:nth-of-type(1) .option__label,
 .option-input:nth-child(2):checked ~ .option:nth-of-type(2) .option__label,
 .option-input:nth-child(1):checked ~ .option:nth-of-type(1) .option__label::after,
 .option-input:nth-child(2):checked ~ .option:nth-of-type(2) .option__label::after {
   -webkit-transform: scale(1);
-          transform: scale(1);
+  transform: scale(1);
 }
