@@ -11,9 +11,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
     <style>
-        div.col-sm-3 {
-            margin: 1rem;
-        }
+
     </style>
 
     <script>
@@ -31,8 +29,9 @@
                     {#right_pitch: null,#}
                     new_left_pitch: null,
                     new_right_pitch: null,
-                    pollUpdateInteval: null,
-                    isUpdateInProgress: null
+                    pollUpdateInterval: null,
+                    isUpdateInProgress: null,
+                    successNotif: false,
                 },
                 mounted() {
                     this.getModules();
@@ -79,7 +78,6 @@
                         self = this;
                         axios.post("{{ url_for('update_firmware') }}", data)
                             .then(function (response) {
-                                console.log(response)
                                 if(response.status == 200) {
                                     self.isUpdateInProgress = true;
                                     self.pollUpdateInteval = setInterval(self.pollFirmwareUpdateStatus, 3000); // Time in milliseconds
