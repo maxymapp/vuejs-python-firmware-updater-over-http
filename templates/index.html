@@ -45,7 +45,7 @@
                     pollUpdateInterval: null,
                     isUpdateInProgress: null,
                     successNotif: false,
-                    currentPage: 0
+                    leftPitch: true
                 },
                 mounted() {
                     this.getModules();
@@ -136,7 +136,9 @@
                                 console.log(error)
 
                             })
-
+                    },
+                    flipPitchSide: function() {
+                        this.leftPitch = !this.leftPitch;
                     }
                 },
                 watch: {
@@ -152,10 +154,11 @@
 </head>
 <body>
 <div id="app" class="container">
-    <h1>Select pitch size</h1>
     <div>
-        <div v-if="this.currentPage == 0">
-            <h2>Left</h2>
+        <div v-if="this.leftPitch">
+            <div class="call-to-action">
+                <h1>Select LEFT pitch size</h1>
+            </div>
             <div class="option-group">
                 <div class="option-container">
 
@@ -201,8 +204,10 @@
                 </div>
             </div>
         </div>
-        <div v-if="this.currentPage == 1">
-            <h2>Right</h2>
+        <div v-if="!this.leftPitch">
+            <div class="call-to-action">
+                <h1>Select RIGHT pitch size</h1>
+            </div>
             <div class="option-group">
                 <div class="option-container">
 
