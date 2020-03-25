@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
     <style>
-        h2 {
+        h1 {
             text-align: center;
         }
     </style>
@@ -141,15 +141,15 @@
 </head>
 <body>
 <div id="app" class="container">
-    <h2 style="margin: 3rem">Select pitch size</h2>
-    <div class="row">
-        <div v-if="this.currentPage == 0" class="col-sm-6">
+    <h1>Select pitch size</h1>
+    <div>
+        <div v-if="this.currentPage == 0">
             <h2>Left</h2>
             <div class="option-group">
                 <div class="option-container">
 
-                    <input class="option-input"  id="option-1" type="radio" name="options" />
-                    <input class="option-input" id="option-2" type="radio" name="options" />
+                    <input class="option-input" v-model="new_left_pitch" id="option-1" type="radio" name="options" />
+                    <input class="option-input" v-model="new_left_pitch" id="option-2" type="radio" name="options" />
 
                     <label class="option" for="option-1">
                         <span class="option__indicator"></span>
@@ -170,8 +170,8 @@
             <div class="option-group">
                 <div class="option-container">
 
-                    <input class="option-input"  id="option-3" type="radio" name="options" />
-                    <input class="option-input"  id="option-4" type="radio" name="options" />
+                    <input class="option-input" v-model="new_left_pitch" id="option-3" type="radio" name="options" />
+                    <input class="option-input" v-model="new_left_pitch" id="option-4" type="radio" name="options" />
 
                     <label class="option" for="option-3">
                         <span class="option__indicator"></span>
@@ -190,7 +190,7 @@
                 </div>
             </div>
         </div>
-        <div v-if="this.currentPage == 1" class="pull-right col-sm-6">
+        <div v-if="this.currentPage == 1">
             <h2>Right</h2>
             <div class="option-group">
                 <div class="option-container">
