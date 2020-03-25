@@ -40,7 +40,7 @@ body {
   flex: 1;
   display: block;
   padding: 0.5em;
-  background: #FFF;
+  background: pink;
   position: relative;
   margin: 0em;
   margin-right: 0.2em;
@@ -85,7 +85,7 @@ body {
 .option__indicator:after {
   content: '';
   display: block;
-  border: solid 2px #64D6EE;
+  border: solid 2px white;
   border-radius: 50%;
   width: 0.25em;
   height: 0.25em;
@@ -94,7 +94,7 @@ body {
   right: 0;
 }
 .option__indicator:after {
-  background: #64D6EE;
+  background: white;
   -webkit-transform: scale(0);
   transform: scale(0);
   -webkit-transition: inherit;
@@ -130,7 +130,7 @@ body {
 .option__label:after {
   content: '';
   display: block;
-  border: solid 2px #64D6EE;
+  border: solid 2px white;
   width: 100%;
   -webkit-transform-origin: 0 0;
   transform-origin: 0 0;
