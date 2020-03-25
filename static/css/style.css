@@ -1,6 +1,6 @@
 html {
-  background: -webkit-gradient(linear, left top, left bottom, from(#4678F3), to(#64D6EE));
-  background: linear-gradient(to bottom, #4678F3, #64D6EE);
+  background: -webkit-gradient(linear, left top, left bottom, from(orangered), to(slategrey));
+  background: linear-gradient(to bottom, orangered, slategrey);
   font-size: 62.5%;
   height: 100%;
   display: -webkit-box;
@@ -9,6 +9,7 @@ html {
 body {
   width: 100%;
   margin: auto;
+  background-color: transparent;
 }
 .option-group {
   width: 90%;
