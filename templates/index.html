@@ -13,6 +13,9 @@
     <style>
         h1 {
             text-align: center;
+            color: white;
+            text-transform: uppercase;
+            margin-bottom: 5rem;
         }
         .tile {
             margin: auto;
@@ -24,6 +27,15 @@
             border-radius: 1em;
             align-content: center;
             text-align: center;
+        }
+        .tile-style {
+            background-color: pink;
+            opacity: 0.5;
+
+        }
+        span.status-msg {
+            text-transform: uppercase;
+            color: white;
         }
     </style>
 
@@ -157,8 +169,8 @@
 <div id="app" class="container">
     <div>
         <div v-if="this.leftPitch">
-            <div class="call-to-action">
-                <h1>Select LEFT pitch size</h1>
+            <div>
+                <h1>Select pitch on LEFT side</h1>
             </div>
             <div class="option-group">
                 <div class="option-container">
@@ -206,8 +218,8 @@
             </div>
         </div>
         <div v-if="!this.leftPitch">
-            <div class="call-to-action">
-                <h1>Select RIGHT pitch size</h1>
+            <div>
+                <h1>Select pitch on right side</h1>
             </div>
             <div class="option-group">
                 <div class="option-container">
