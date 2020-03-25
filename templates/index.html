@@ -11,7 +11,9 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
     <style>
-
+        h2 {
+            text-align: center;
+        }
     </style>
 
     <script>
@@ -32,6 +34,7 @@
                     pollUpdateInterval: null,
                     isUpdateInProgress: null,
                     successNotif: false,
+                    currentPage: 0
                 },
                 mounted() {
                     this.getModules();
@@ -137,120 +140,114 @@
     </script>
 </head>
 <body>
-<div id="app">
-    <div class="option-group">
-        <div class="option-container">
+<div id="app" class="container">
+    <h2 style="margin: 3rem">Select pitch size</h2>
+    <div class="row">
+        <div v-if="this.currentPage == 0" class="col-sm-6">
+            <h2>Left</h2>
+            <div class="option-group">
+                <div class="option-container">
 
-            <input class="option-input" checked id="option-1" type="radio" name="options" />
-            <input class="option-input" id="option-2" type="radio" name="options" />
+                    <input class="option-input"  id="option-1" type="radio" name="options" />
+                    <input class="option-input" id="option-2" type="radio" name="options" />
 
-            <label class="option" for="option-1">
-                <span class="option__indicator"></span>
-                <span class="option__label">
-                    1.6<sub>inches</sub>
-                </span>
-            </label>
+                    <label class="option" for="option-1">
+                        <span class="option__indicator"></span>
+                        <span class="option__label">
+                            1.6<sub>inches</sub>
+                        </span>
+                    </label>
 
-            <label class="option" for="option-2">
-                <span class="option__indicator"></span>
-                <span class="option__label">
-                    2.0<sub>inches</sub>
-                </span>
-            </label>
+                    <label class="option" for="option-2">
+                        <span class="option__indicator"></span>
+                        <span class="option__label">
+                            2.0<sub>inches</sub>
+                        </span>
+                    </label>
 
-        </div>
-    </div>
-    <div class="option-group">
-        <div class="option-container">
-
-            <input class="option-input" id="option-3" type="radio" name="options" />
-            <input class="option-input" id="option-4" type="radio" name="options" />
-
-            <label class="option" for="option-3">
-                <span class="option__indicator"></span>
-                <span class="option__label">
-                    2.5<sub>inches</sub>
-                </span>
-            </label>
-
-            <label class="option" for="option-4">
-                <span class="option__indicator"></span>
-                <span class="option__label">
-                    4.0<sub>inches</sub>
-                </span>
-            </label>
-
-        </div>
-    </div>
-
-    <h4 style="margin: 3rem">Select pitch size</h4>
-    <div class="row" style="margin: 3rem">
-        <div class="col-sm-3">
-            <h5>Left</h5>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" v-model="new_left_pitch" id="new_left_pitch-1.6" value="1.6">
-                <label class="form-check-label" for="new_left_pitch-1.6">
-                    1.6
-                </label>
+                </div>
             </div>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" v-model="new_left_pitch" id="new_left_pitch-2.0" value="2.0">
-                <label class="form-check-label" for="new_left_pitch-2.0">
-                    2.0
-                </label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" v-model="new_left_pitch" id="new_left_pitch-2.5" value="2.5">
-                <label class="form-check-label" for="new_left_pitch-2.5">
-                    2.5
-                </label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" v-model="new_left_pitch" id="new_left_pitch-4.0" value="4.0">
-                <label class="form-check-label" for="new_left_pitch-4.0">
-                    4.0
-                </label>
+            <div class="option-group">
+                <div class="option-container">
+
+                    <input class="option-input"  id="option-3" type="radio" name="options" />
+                    <input class="option-input"  id="option-4" type="radio" name="options" />
+
+                    <label class="option" for="option-3">
+                        <span class="option__indicator"></span>
+                        <span class="option__label">
+                            2.5<sub>inches</sub>
+                        </span>
+                    </label>
+
+                    <label class="option" for="option-4">
+                        <span class="option__indicator"></span>
+                        <span class="option__label">
+                            4.0<sub>inches</sub>
+                        </span>
+                    </label>
+
+                </div>
             </div>
         </div>
+        <div v-if="this.currentPage == 1" class="pull-right col-sm-6">
+            <h2>Right</h2>
+            <div class="option-group">
+                <div class="option-container">
 
-        <div class="col-sm-3">
-            <h5>Right</h5>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" v-model="new_right_pitch" id="new_right_pitch-1.6" value="1.6">
-                <label class="form-check-label" for="new_right_pitch-1.6">
-                    1.6
-                </label>
+                    <input class="option-input" v-model="new_right_pitch" id="option-5" type="radio" name="options" />
+                    <input class="option-input" v-model="new_right_pitch" id="option-6" type="radio" name="options" />
+
+                    <label class="option" for="option-5">
+                        <span class="option__indicator"></span>
+                        <span class="option__label">
+                            1.6<sub>inches</sub>
+                        </span>
+                    </label>
+
+                    <label class="option" for="option-6">
+                        <span class="option__indicator"></span>
+                        <span class="option__label">
+                            2.0<sub>inches</sub>
+                        </span>
+                    </label>
+
+                </div>
             </div>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" v-model="new_right_pitch" id="new_right_pitch-2.0" value="2.0">
-                <label class="form-check-label" for="new_right_pitch-2.0">
-                    2.0
-                </label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" v-model="new_right_pitch" id="new_right_pitch-2.5" value="2.5">
-                <label class="form-check-label" for="new_right_pitch-2.5">
-                    2.5
-                </label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" v-model="new_right_pitch" id="new_right_pitch-4.0" value="4.0">
-                <label class="form-check-label" for="new_right_pitch-4.0">
-                    4.0
-                </label>
+            <div class="option-group">
+                <div class="option-container">
+
+                    <input class="option-input" v-model="new_right_pitch" id="option-7" type="radio" name="options" />
+                    <input class="option-input" v-model="new_right_pitch" id="option-8" type="radio" name="options" />
+
+                    <label class="option" for="option-7">
+                        <span class="option__indicator"></span>
+                        <span class="option__label">
+                            2.5<sub>inches</sub>
+                        </span>
+                    </label>
+
+                    <label class="option" for="option-8">
+                        <span class="option__indicator"></span>
+                        <span class="option__label">
+                            4.0<sub>inches</sub>
+                        </span>
+                    </label>
+
+                </div>
             </div>
         </div>
     </div>
 
-        <div v-if="this.wasNewValueSelected" v-cloak style="margin: 3rem">
-            <div v-if="!this.isUpdateInProgress">
-                <button v-on:click="this.updateButtonHandle" v-if="!this.successNotif" class="btn btn-primary">Update Pitch</button>
-                <div v-if="this.successNotif" class="progress-bar bg-success" role="progressbar" style="width: 100%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">Firmware updated successfully</div>
-            </div>
-            <div v-else class="progress">
-                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"  style="width: 100%;" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" >Updating firmware...</div>
-            </div>
-        </div>
+{#    <div v-if="this.wasNewValueSelected" v-cloak>#}
+{#        <div v-if="!this.isUpdateInProgress">#}
+{#            <button v-on:click="this.updateButtonHandle" v-if="!this.successNotif" class="btn btn-primary">Update Pitch</button>#}
+{#            <div v-if="this.successNotif" class="progress-bar bg-success" role="progressbar" style="width: 100%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">Firmware updated successfully</div>#}
+{#        </div>#}
+{#        <div v-else class="progress">#}
+{#            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"  style="width: 100%;" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" >Updating firmware...</div>#}
+{#        </div>#}
+{#    </div>#}
 </div>
 
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->
