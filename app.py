@@ -32,16 +32,13 @@ def submit():
 @app.route('/modules')
 def get_modules():
     response = requests.get('http://' + app.config["IP_ADDRESS"] + "/api/devices").json()
-
-    #{"00:18:B7:09:45:40": 2.5, "00:18:B7:09:45:78": 2.0}
     devices = {}
     for device in response['data']:
         device_class = device['attributes']['device-class']
         if device_class.startswith('TCO'):
+            pitch = app.config["DEVICE_CLASS_TO_PITCH"][device_class]
             mac = device['attributes']['mac']
-            devices[mac] = app.config["DEVICE_CLASS_TO_PITCH"][device_class]
-
-    # return devices
+            devices[mac] = pitch
 
     response = requests.get('http://' + app.config["IP_ADDRESS"] + "/api/modules").json()
 
@@ -52,17 +49,12 @@ def get_modules():
 
     modules = {}
     for module in response['data']:
-        if(module['attributes']['offset']['x'] == 0):
+        if module['attributes']['offset']['x'] == 0:
             mac = module['attributes']['mac']
-            # if devices[mac] != float(left_pitch):
-            # modules['leftPitch'] = str(devices[mac])
-            modules['left'] = {'mac': mac, 'pitch': str(devices[mac])}
-        if (module['attributes']['offset']['x'] > 0):
+            modules['left'] = {'mac': mac, 'pitch': str(devices[mac]), 'id': str(module['id'])}
+        if module['attributes']['offset']['x'] > 0:
             mac = module['attributes']['mac']
-            # if devices[mac] != float(right_pitch):
-            # modules['rightPitch'] = str(devices[mac])
-            modules['right'] = {'mac': mac, 'pitch': str(devices[mac])}
-    # return modules
+            modules['right'] = {'mac': mac, 'pitch': str(devices[mac]), 'id': str(module['id'])}
     return jsonify(modules)
 
 @app.route('/update-firmware', methods=['POST'])
