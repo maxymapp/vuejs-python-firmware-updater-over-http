@@ -77,7 +77,6 @@
                     pollUpdateInterval: null,
                     isUpdateInProgress: null,
                     successNotif: false,
-                    leftPitch: true
                 },
                 mounted() {
                     this.getModules();
@@ -289,10 +288,6 @@
             </div>
         </div>
     </div>
-    <div class="tile tile-style" v-if="this.leftPitch" v-on:click="this.flipPitchSide">
-        <span class="status-msg">
-            NEXT
-        </span>
 
     </div>
     <div v-if="!this.leftPitch && this.wasNewValueSelected">
