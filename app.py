@@ -12,23 +12,6 @@ app.config.from_pyfile('config.cfg')
 def hello():
     return render_template('index.html')
 
-@app.route('/submit', methods=['POST'])
-def submit():
-    left_pitch  = float(request.form['left-pitch'])
-    right_pitch = float(request.form['right-pitch'])
-
-    if (left_pitch not in app.config['PITCH_SIZES']) or (right_pitch not in app.config['PITCH_SIZES']):
-        #TODO need frontend error?
-        return "invalid request parameter"
-
-    # return "nothing to update"
-    # return dumps(modules)
-    # if modules != []:
-    #     for module in modules:
-    #         return update_firmware(module)
-
-    return 'program finished'
-
 @app.route('/modules')
 def get_modules():
     response = requests.get('http://' + app.config["IP_ADDRESS"] + "/api/devices").json()
@@ -94,11 +77,20 @@ def poll_firmware_update():
 
 @app.route('/reboot-devices', methods=["POST"])
 def reboot_devices():
-    macs = request.form['mac']
+    id = request.form['id']
     url = 'http://' + app.config["IP_ADDRESS"] + '/api/devices?command=reboot'
     headers = {'Authorization': 'Bearer ' + app.config["AUTH_TOKEN"]}
-    r = requests.post(url, data = {'ids':macs}, headers=headers)
+    r = requests.post(url, data = {'ids': [id]}, headers=headers)
     return 'rebooting macs'
+
+@app.route('/poll-reboot')
+def poll_reboot():
+    url = 'http://' + app.config["IP_ADDRESS"] + "/api/progresses?filter[type]=reboot-devices"
+    headers = {'Authorization': 'Bearer ' + app.config["AUTH_TOKEN"]}
+
+    r = requests.get(url, headers=headers)
+    return r.content
+
 
 #3
 # patch to /api/modules to update the offset and size.  Here is the json for that:
