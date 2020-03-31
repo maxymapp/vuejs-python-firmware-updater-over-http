@@ -96,20 +96,14 @@ def poll_reboot():
 
 @app.route('/patch-modules', methods=['POST'])
 def patch_modules():
-    headers = {'Authorization': 'Bearer ' + app.config["AUTH_TOKEN"]}
-
-    url = 'http://' + app.config["IP_ADDRESS"] + "/api/modules"
-    response = requests.get(url).json()
-
-    module_id = request.form['module_id']
-    this_pitch = request.form['this_pitch']
-
     pitch_to_dims = {
         '1.6': {'w': 192, 'h': 216},
         '2.0': {'w': 160, 'h': 180},
         '2.5': {'w': 128, 'h': 144},
         '4.0': {'w': 80, 'h': 90}
     }
+    module_id = request.form['module_id']
+    this_pitch = request.form['this_pitch']
 
     if "the_other_pitch" in request.form:
         the_other_pitch = request.form['the_other_pitch']
@@ -133,9 +127,10 @@ def patch_modules():
             }
         }
     }
-    # return data
 
-    r = requests.patch(url, data, headers=headers)
+    url = 'http://' + app.config["IP_ADDRESS"] + "/api/modules"
+    headers = {'Authorization': 'Bearer ' + app.config["AUTH_TOKEN"]}
+    r = requests.patch(url, dumps(data), headers=headers)
     return r.content
 
 #Patch layouts
