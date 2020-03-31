@@ -36,8 +36,8 @@
                     new_left_pitch: null,
                     new_right_pitch: null,
                     pollUpdateInterval: null,
-                    isUpdateInProgress: null,
-                    successNotif: false,
+                    isUpdateInProgress: false,
+                    wasUpdated: 0
                 },
                 mounted() {
                     this.getModules();
@@ -58,26 +58,34 @@
                         axios.get("{{ url_for('get_modules') }}")
                             .then((res) => {
                                 this.modules = res.data;
+                                this.new_left_pitch = this.modules['left']['pitch'];
+                                this.new_right_pitch = this.modules['right']['pitch'];
                             })
                             .catch((error) => {
                                 console.error("failed to get current pitch");
                                 console.error(error);
                             })
                     },
-                    updateButtonHandle: async function() {
-                        if(!this.wasNewValueSelected) {
-                            console.log('new value was not selected');
-                            return;
+                    updateButtonHandle: function() {
+                        this.wasUpdated = 0;//reseting since last update
+                        console.log("updateButtonHandle entered");
+
+                        if (this.wasLeftPitchChanged) {
+                            let mac = this.modules['left']['mac'];
+                            let pitch = this.new_left_pitch;
+                            let id = this.modules['left']['id'];
+
+                            this.updateFirmware(mac, pitch, id);
                         }
-                        if(this.wasLeftPitchChanged)
-                            await this.updateFirmware(this.modules['left']['mac'], this.new_left_pitch);
-
-                        if(this.wasRightPitchChanged)
-                            await this.updateFirmware(this.modules['right']['mac'], this.new_right_pitch);
-
+                        //no timeout if the only to be updated
+                        if(this.wasRightPitchChanged) {
+                            let mac = this.modules['right']['mac'];
+                            let pitch = this.new_right_pitch;
+                            let id = this.modules['right']['id'];
+                            setTimeout(this.updateFirmware, 20000, mac, pitch, id);
+                        }
                     },
-                    updateFirmware: function(mac, pitch) {
-                        console.log("updating firmware request");
+                    updateFirmware: function(mac, pitch, id) {//setInterval to retry updates? clearInterval in response successful body
                         let data = new FormData();
                         data.append('mac', mac);
                         data.append('pitch', pitch);
@@ -86,56 +94,86 @@
                             .then(function (response) {
                                 if(response.status == 200) {
                                     self.isUpdateInProgress = true;
-                                    self.pollUpdateInteval = setInterval(self.pollFirmwareUpdateStatus, 3000); // Time in milliseconds
-
+                                    self.pollUpdateInterval = setInterval(self.pollFirmwareUpdateStatus, 3000, id);
                                 }
                             })
                             .catch(function (error) {
                                 console.log(error)
                             })
                     },
-                    pollFirmwareUpdateStatus: function() {
+                    pollFirmwareUpdateStatus: function(id) {
                         self = this;
-
-                        console.log("polling firmware update status.... :");
                         axios.get("{{ url_for('poll_firmware_update') }}")
                             .then(function (response) {
-                                var isFinishedStatus = response.data.data[0].attributes["is-finished"];
+                                let isFinishedStatus = response.data.data[0].attributes["is-finished"];
                                 if(isFinishedStatus) {
-                                    clearInterval(self.pollUpdateInteval);
-                                    self.isUpdateInProgress = false;
-                                    self.successNotif = true;
+                                    clearInterval(self.pollUpdateInterval);
+                                    self.rebootDevice(id)
                                 }
-
-                                console.log(isFinishedStatus)
+                                console.log(isFinishedStatus ? "flashed firmware 100%"  : " flashing firmware...")
 
                             })
                             .catch(function (error) {
                                 console.log(error)
 
                             })
-
                     },
-                    rebootDevices: function(mac) {
-                        data = new FormData();
-                        data.append('mac', mac);
+                    rebootDevice: function(id) {
+                        let data = new FormData();
+                        data.append('id', id);
+                        self = this;
                         axios.post("{{ url_for('reboot_devices') }}", data)
                             .then(function (response) {
                                 console.log(response);
+                                self.pollRebootProgress(id);
                             })
                             .catch(function(error) {
                                 console.log(error)
 
                             })
-                    }
-                },
-                watch: {
-                    modules: function(val) {
-                        if(val) {
-                            this.new_left_pitch = val['left']['pitch'];
-                            this.new_right_pitch = val['right']['pitch'];
-                        }
                     },
+                    pollRebootProgress: function (id) {
+                        axios.get("{{ url_for('poll_reboot') }}")
+                            .then(function (response) {
+                                let isFinished = response.data.data[0].attributes["is-finished"];
+                                if(isFinished) {
+                                    setTimeout(self.patchModules, 5000, id);
+                                    self.wasUpdated += 1;
+                                    if(self.wasUpdated == 2) {
+                                        self.isUpdateInProgress = false;
+                                        setTimeout(self.getModules, 7000);//important to wait until updated
+
+                                    }
+                                }
+                                console.log(isFinished ? "updated 100%"  : " updating...")
+                            })
+                            .catch(function(error) {
+                                console.log(error)
+
+                            })
+                    },
+                    patchModules: function (id) {
+                        let data = new FormData();
+                        data.append('module_id', id);
+                        //this pitch used for new dimensions, the other pitch - for its offset
+                        if (id == 607608) {
+                            data.append('this_pitch', this.new_left_pitch);
+                            {#data.append('the_other_pitch', this.new_right_pitch);#}
+                        }
+                        if (id == 607552) {
+                            data.append('this_pitch', this.new_right_pitch);
+                            data.append('the_other_pitch', this.new_left_pitch);
+                        }
+
+                        axios.post("{{ url_for('patch_modules') }}", data)
+                            .then(function (response) {
+                                console.log(response);
+                            })
+                            .catch(function(error) {
+                                console.log(error);
+
+                            })
+                    }
                 }
             })}
     </script>
@@ -243,24 +281,17 @@
         </div>
     </div>
 
+    <div v-if="this.isUpdateInProgress && this.wasUpdated != 2">
+        <div class="progress-bar-animated progress-bar-striped progress-bar bg-danger tile" role="progressbar"
+             style="width: 400px; height:50px" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
+            <span class="status-msg">Updating...</span>
+        </div>
     </div>
-    <div v-if="!this.leftPitch && this.wasNewValueSelected">
-        <div v-if="!this.isUpdateInProgress">
-            <div v-on:click="this.updateButtonHandle" v-if="!this.successNotif" class="tile tile-style">
-                <span class="status-msg">Update</span>
-            </div>
-            <div v-if="this.successNotif" class="tile progress-bar bg-success" role="progressbar" style="width: 400px" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
-                <span class="status-msg">
-                     Update successful
-                </span>
-            </div>
-        </div>
-        <div v-else>
-            <div class="progress-bar-animated progress-bar-striped progress-bar bg-danger tile" role="progressbar"
-                 style="width: 400px; height:50px" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
-                <span class="status-msg">Updating...</span>
-            </div>
-        </div>
+    <div v-if="!this.isUpdateInProgress && this.wasUpdated == 2" class="tile progress-bar-striped bg-success" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
+        <span class="status-msg">Update successful</span>
+    </div>
+    <div v-if="!this.isUpdateInProgress && this.wasNewValueSelected" v-on:click="this.updateButtonHandle" class="tile" style="background-color: darkorange;">
+        <span class="status-msg">Update</span>
     </div>
 </div>
 
