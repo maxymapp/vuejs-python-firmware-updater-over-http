@@ -36,11 +36,10 @@ def get_modules():
 
     modules = {}
     for module in response['data']:
-        if module['attributes']['offset']['x'] == 0:
-            mac = module['attributes']['mac']
+        mac = module['attributes']['mac']
+        if mac == "00:18:B7:09:45:78":
             modules['left'] = {'mac': mac, 'pitch': str(devices[mac]), 'id': str(module['id'])}
-        if module['attributes']['offset']['x'] > 0:
-            mac = module['attributes']['mac']
+        if mac == "00:18:B7:09:45:40":
             modules['right'] = {'mac': mac, 'pitch': str(devices[mac]), 'id': str(module['id'])}
     return jsonify(modules)
 
