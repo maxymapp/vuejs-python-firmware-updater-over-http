@@ -5,59 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-
-    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/selector.css') }}">
 
     <style>
         html {
             background: url("{{ url_for('static',filename='images/d3bg.png') }}") no-repeat 0px 0px;
         }
-        .bg-left {
-            background: url("{{ url_for('static',filename='images/d3bg.png') }}") no-repeat 0px 0px;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            position: absolute;
-            width: 50%;
-        }
-        .bg-right {
-        background: darkred;
-            right: 0;
-            top: 0;
-            bottom: 0;
-            {#background: black;#}
-            position: absolute;
-            width: 50%;
-        }
-        h1 {
-            text-align: center;
-            color: white;
-            text-transform: uppercase;
-            margin-bottom: 5rem;
-        }
-        .tile {
-            margin: auto;
-            margin-bottom: 1rem;
-            background-color: pink;
-            opacity: 0.5;
-            width: 400px;
-            height: 50px;
-            border-radius: 1em;
-            align-content: center;
-            text-align: center;
-        }
-        .tile-style {
-            background-color: pink;
-            opacity: 0.5;
-
-        }
-        span.status-msg {
-            text-transform: uppercase;
-            color: white;
+        [v-cloak] {
+            display: none;
         }
     </style>
+
+    {#    <script src="{{ url_for('static', filename='axios.js') }}"></script>#}
+    {#    <script src="{{ url_for('static', filename='vue.js') }}"></script>#}
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
     <script>
         if (navigator.onLine) {
@@ -178,9 +141,7 @@
     </script>
 </head>
 <body>
-<div class="bg-left"></div>
-<div class="bg-right"></div>
-<div id="app" class="container">
+<div v-cloak id="app" class="container">
     <div class="row">
         <div class="col-md-6">
             <div>
