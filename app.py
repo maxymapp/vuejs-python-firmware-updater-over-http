@@ -133,24 +133,58 @@ def patch_modules():
     r = requests.patch(url, dumps(data), headers=headers)
     return r.content
 
-#Patch layouts
-@app.route('/patch-layouts')
+@app.route('/patch-layouts', methods=['POST'])
 def patch_layouts():
-    uri = "/api/layouts/0"
-    method = "PATCH"
-    return 'patching layouts'
+    pitch_to_dims = {
+        '1.6': {'w': 192, 'h': 216},
+        '2.0': {'w': 160, 'h': 180},
+        '2.5': {'w': 128, 'h': 144},
+        '4.0': {'w': 80, 'h': 90}
+    }
+    module_id = request.form['module_id']
+    this_pitch = request.form['this_pitch']
 
-#Restarts the controller to apply any changes made to the configuration.
-@app.route('/restart-controller')
+    if "the_other_pitch" in request.form:
+        the_other_pitch = request.form['the_other_pitch']
+        offset_x = pitch_to_dims[the_other_pitch]['w']
+    else:
+        offset_x = 0
+
+    url = 'http://' + app.config["IP_ADDRESS"] + "/api/layouts/0"
+    headers = {'Authorization': 'Bearer ' + app.config["AUTH_TOKEN"]}
+
+    data = {
+        "data": {
+            "type": "layouts",
+            "id": module_id,
+            "attributes": {
+                "position": {
+                    "x": offset_x,
+                    "y": 0
+                },
+                "size": {
+                    "width": pitch_to_dims[this_pitch]['w'],
+                    "height": pitch_to_dims[this_pitch]['h']
+                }
+            }
+        }
+    }
+    return dumps(data)
+    r = requests.patch(url, dumps(data), headers=headers)
+    return r.content
+
+
+@app.route('/restart-controller', methods=['POST'])
 def restart_controller():
-    url = '/api/controllers/0?command=restart'
+    url = 'http://' + app.config["IP_ADDRESS"] + '/api/controllers/0?command=restart'
     headers = {'Authorization': 'Bearer ' + app.config["AUTH_TOKEN"]}
     r = requests.post(url, headers=headers)
-
-    return "restarting the controller"
+    return r.content
 
 #Restarting the Scheduler.
-@app.route('/restart-scheduler')
+@app.route('/restart-scheduler', methods=['POST'])
 def restart_scheduler():
-    url = '/api/schedulers/0?command=restart'
-    return "Restarting the Scheduler."
+    url = 'http://' + app.config["IP_ADDRESS"] + '/api/schedulers/0?command=restart'
+    headers = {'Authorization': 'Bearer ' + app.config["AUTH_TOKEN"]}
+    r = requests.post(url, headers=headers)
+    return r.content
