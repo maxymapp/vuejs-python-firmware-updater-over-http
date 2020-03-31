@@ -12,8 +12,7 @@ app.config.from_pyfile('config.cfg')
 def hello():
     return render_template('index.html')
 
-@app.route('/modules')
-def get_modules():
+def get_devices():
     response = requests.get('http://' + app.config["IP_ADDRESS"] + "/api/devices").json()
     devices = {}
     for device in response['data']:
@@ -22,6 +21,11 @@ def get_modules():
             pitch = app.config["DEVICE_CLASS_TO_PITCH"][device_class]
             mac = device['attributes']['mac']
             devices[mac] = pitch
+    return devices
+
+@app.route('/modules')
+def get_modules():
+    devices = get_devices()
 
     response = requests.get('http://' + app.config["IP_ADDRESS"] + "/api/modules").json()
 
