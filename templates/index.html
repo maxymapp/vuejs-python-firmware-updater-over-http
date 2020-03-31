@@ -77,12 +77,15 @@
 
                             this.updateFirmware(mac, pitch, id);
                         }
-                        //no timeout if the only to be updated
                         if(this.wasRightPitchChanged) {
                             let mac = this.modules['right']['mac'];
                             let pitch = this.new_right_pitch;
                             let id = this.modules['right']['id'];
-                            setTimeout(this.updateFirmware, 20000, mac, pitch, id);
+                            if(this.wasLeftPitchChanged) {
+                                setTimeout(this.updateFirmware, 20000, mac, pitch, id);
+                            } else {
+                                this.updateFirmware(mac, pitch, id);
+                            }
                         }
                     },
                     updateFirmware: function(mac, pitch, id) {//setInterval to retry updates? clearInterval in response successful body
