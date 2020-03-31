@@ -1,0 +1,21 @@
+h1 {
+    text-align: center;
+    color: white;
+    text-transform: uppercase;
+    margin-bottom: 5rem;
+}
+.tile {
+    margin: auto;
+    margin-top: 2rem;
+    padding: 1rem;
+    width: 400px;
+    height: 50px;
+    border-radius: 1em;
+    align-content: center;
+    text-align: center;
+}
+span.status-msg {
+    text-transform: uppercase;
+    font-size: 2em;
+
+}
