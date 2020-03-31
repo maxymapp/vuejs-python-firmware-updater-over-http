@@ -94,31 +94,49 @@ def poll_reboot():
     r = requests.get(url, headers=headers)
     return r.content
 
+@app.route('/patch-modules', methods=['POST'])
+def patch_modules():
+    headers = {'Authorization': 'Bearer ' + app.config["AUTH_TOKEN"]}
 
-#3
-# patch to /api/modules to update the offset and size.  Here is the json for that:
-@app.route('/patch-modules')
-def patch_modules(macs):
-    uri = "/api/modules"
-    method = "PATCH"
-    return "patching modules"
+    url = 'http://' + app.config["IP_ADDRESS"] + "/api/modules"
+    response = requests.get(url).json()
 
-# {
-#   "data": {
-#     "type": "modules",
-#     "id": "69798",
-#     "attributes": {
-#       "offset": {
-#         "x": 1000,
-#         "y": 20
-#       },
-#       "size": {
-# 	"width": 440,
-# 	"height": 280
-#         }
-#     }
-#   }
-# }
+    module_id = request.form['module_id']
+    this_pitch = request.form['this_pitch']
+
+    pitch_to_dims = {
+        '1.6': {'w': 192, 'h': 216},
+        '2.0': {'w': 160, 'h': 180},
+        '2.5': {'w': 128, 'h': 144},
+        '4.0': {'w': 80, 'h': 90}
+    }
+
+    if "the_other_pitch" in request.form:
+        the_other_pitch = request.form['the_other_pitch']
+        offset_x = pitch_to_dims[the_other_pitch]['w']
+    else:
+        offset_x = 0
+
+    data = {
+        "data": {
+            "type": "modules",
+            "id": module_id,
+            "attributes": {
+                "offset": {
+                    "x": offset_x,
+                    "y": 0
+                },
+                "size": {
+                    "width": pitch_to_dims[this_pitch]['w'],
+                    "height": pitch_to_dims[this_pitch]['h']
+                }
+            }
+        }
+    }
+    # return data
+
+    r = requests.patch(url, data, headers=headers)
+    return r.content
 
 #Patch layouts
 @app.route('/patch-layouts')
