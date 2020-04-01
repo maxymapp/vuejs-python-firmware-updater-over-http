@@ -167,8 +167,41 @@
                             data.append('this_pitch', this.new_right_pitch);
                             data.append('the_other_pitch', this.new_left_pitch);
                         }
-
+                        self = this;
                         axios.post("{{ url_for('patch_modules') }}", data)
+                            .then(function (response) {
+                                console.log(response);
+                                self.patchLayouts(id);
+                            })
+                            .catch(function(error) {
+                                console.log(error);
+
+                            })
+                    },
+                    patchLayouts: function (id) {
+                        let data = new FormData();
+                        data.append('module_id', id);
+                        //this pitch used for new dimensions, the other pitch - for its offset
+                        if (id == 607608) {
+                            data.append('this_pitch', this.new_left_pitch);
+                            {#data.append('the_other_pitch', this.new_right_pitch);#}
+                        }
+                        if (id == 607552) {
+                            data.append('this_pitch', this.new_right_pitch);
+                            data.append('the_other_pitch', this.new_left_pitch);
+                        }
+
+                        axios.post("{{ url_for('patch_layouts') }}", data)
+                            .then(function (response) {
+                                console.log(response);
+                            })
+                            .catch(function(error) {
+                                console.log(error);
+
+                            })
+                    },
+                    restartController: function () {
+                        axios.post("{{ url_for('restart_controller') }}")
                             .then(function (response) {
                                 console.log(response);
                             })
@@ -296,6 +329,7 @@
     <div v-if="!this.isUpdateInProgress && this.wasNewValueSelected" v-on:click="this.updateButtonHandle" class="tile" style="background-color: darkorange;">
         <span class="status-msg">Update</span>
     </div>
+    <button v-on:click="this.restartController">restart controller</button>
 </div>
 
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->
