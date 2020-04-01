@@ -55,18 +55,24 @@
                 },
                 methods: {
                     getModules: function() {
-                        axios.get("{{ url_for('get_modules') }}")
-                            .then((res) => {
-                                this.modules = res.data;
-                                this.new_left_pitch = this.modules['left']['pitch'];
-                                this.new_right_pitch = this.modules['right']['pitch'];
-                            })
-                            .catch((error) => {
-                                console.error("failed to get current pitch");
-                                console.error(error);
-                            })
+                        let httpRequest = new XMLHttpRequest();
+                        self = this;
+                        httpRequest.onreadystatechange = function() {
+                            if (httpRequest.readyState === XMLHttpRequest.DONE) {
+                                if (httpRequest.status === 200) {
+                                    self.modules = JSON.parse(httpRequest.response);
+                                    self.new_left_pitch = self.modules['left']['pitch'];
+                                    self.new_right_pitch = self.modules['right']['pitch'];
+                                    self.isUpdateInProgress = false;
+                                } else {
+                                    console.log("failed to get current pitch:" + httpRequest.statusText);
+                                }
+                            }
+                        };
+                        httpRequest.open('GET', "{{ url_for('get_modules') }}", false);
+                        httpRequest.send();
                     },
-                    updateButtonHandle: function() {
+                    updateButtonHandle: async function() {
                         this.wasUpdated = 0;//reseting since last update
                         console.log("updateButtonHandle entered");
 
@@ -82,7 +88,7 @@
                             let pitch = this.new_right_pitch;
                             let id = this.modules['right']['id'];
                             if(this.wasLeftPitchChanged) {
-                                setTimeout(this.updateFirmware, 20000, mac, pitch, id);
+                                setTimeout(this.updateFirmware, 25000, mac, pitch, id);
                             } else {
                                 this.updateFirmware(mac, pitch, id);
                             }
@@ -92,17 +98,22 @@
                         let data = new FormData();
                         data.append('mac', mac);
                         data.append('pitch', pitch);
+
+                        let httpRequest = new XMLHttpRequest();
                         self = this;
-                        axios.post("{{ url_for('update_firmware') }}", data)
-                            .then(function (response) {
-                                if(response.status == 200) {
+                        httpRequest.onreadystatechange = function(){
+                            if (httpRequest.readyState === XMLHttpRequest.DONE) {
+                                if (httpRequest.status === 200) {
+                                    console.log("started update");
                                     self.isUpdateInProgress = true;
-                                    self.pollUpdateInterval = setInterval(self.pollFirmwareUpdateStatus, 3000, id);
+                                    self.pollUpdateInterval = setInterval(self.pollFirmwareUpdateStatus, 7000, id);
+                                } else {
+                                    console.error("failed to update firmware:" + httpRequest.statusText);
                                 }
-                            })
-                            .catch(function (error) {
-                                console.log(error)
-                            })
+                            }
+                        };
+                        httpRequest.open('POST', "{{ url_for('update_firmware') }}", false);
+                        httpRequest.send(data);
                     },
                     pollFirmwareUpdateStatus: function(id) {
                         self = this;
@@ -137,15 +148,15 @@
                     },
                     pollRebootProgress: function (id) {
                         axios.get("{{ url_for('poll_reboot') }}")
-                            .then(function (response) {
+                            .then(async function (response) {
                                 let isFinished = response.data.data[0].attributes["is-finished"];
                                 if(isFinished) {
-                                    setTimeout(self.patchModules, 5000, id);
+                                    await self.patchModules(id);
+                                    await self.patchLayouts(id);
+                                    await self.restartController();
                                     self.wasUpdated += 1;
                                     if(self.wasUpdated == 2) {
-                                        self.isUpdateInProgress = false;
                                         setTimeout(self.getModules, 7000);//important to wait until updated
-
                                     }
                                 }
                                 console.log(isFinished ? "updated 100%"  : " updating...")
@@ -171,7 +182,6 @@
                         axios.post("{{ url_for('patch_modules') }}", data)
                             .then(function (response) {
                                 console.log(response);
-                                self.patchLayouts(id);
                             })
                             .catch(function(error) {
                                 console.log(error);
@@ -216,7 +226,7 @@
 </head>
 <body>
 <div v-cloak id="app" class="container">
-    <div class="row">
+    <div class="row" v-if="!this.isUpdateInProgress">
         <div class="col-md-6">
             <div>
                 <h1>Select pitch on LEFT side</h1>
@@ -329,7 +339,6 @@
     <div v-if="!this.isUpdateInProgress && this.wasNewValueSelected" v-on:click="this.updateButtonHandle" class="tile" style="background-color: darkorange;">
         <span class="status-msg">Update</span>
     </div>
-    <button v-on:click="this.restartController">restart controller</button>
 </div>
 
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->
