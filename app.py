@@ -41,7 +41,7 @@ def get_modules():
             modules['left'] = {'mac': mac, 'pitch': str(devices[mac]), 'id': str(module['id'])}
         if mac == "00:18:B7:09:45:40":
             modules['right'] = {'mac': mac, 'pitch': str(devices[mac]), 'id': str(module['id'])}
-    return jsonify(modules)
+    return modules
 
 @app.route('/update-firmware', methods=['POST'])
 def update_firmware():
@@ -133,6 +133,13 @@ def patch_modules():
     r = requests.patch(url, dumps(data), headers=headers)
     return r.content
 
+@app.route('/save-config', methods=['POST'])
+def save_configuration():
+    url = "http://" + app.config["IP_ADDRESS"] + "/api/controllers/0?command=save-sign-configuration"
+    headers = {'Authorization': 'Bearer ' + app.config["AUTH_TOKEN"]}
+    r = requests.post(url, headers=headers)
+    return r.content
+
 @app.route('/patch-layouts', methods=['POST'])
 def patch_layouts():
     pitch_to_dims = {
@@ -147,10 +154,12 @@ def patch_layouts():
     if "the_other_pitch" in request.form:
         the_other_pitch = request.form['the_other_pitch']
         offset_x = pitch_to_dims[the_other_pitch]['w']
+        layout_id = "0x8e26617cd8"
     else:
         offset_x = 0
+        layout_id = "0x8e26617cd7"
 
-    url = 'http://' + app.config["IP_ADDRESS"] + "/api/layouts/0"
+    url = 'http://' + app.config["IP_ADDRESS"] + "/api/layouts/" + layout_id
     headers = {'Authorization': 'Bearer ' + app.config["AUTH_TOKEN"]}
 
     data = {
