@@ -178,7 +178,7 @@ def patch_layouts():
             }
         }
     }
-    return dumps(data)
+    # return dumps(data)
     r = requests.patch(url, dumps(data), headers=headers)
     return r.content
 
