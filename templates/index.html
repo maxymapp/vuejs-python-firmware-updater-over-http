@@ -88,7 +88,7 @@
                             let pitch = this.new_right_pitch;
                             let id = this.modules['right']['id'];
                             if(this.wasLeftPitchChanged) {
-                                setTimeout(this.updateFirmware, 25000, mac, pitch, id);
+                                setTimeout(this.updateFirmware, 30000, mac, pitch, id);
                             } else {
                                 this.updateFirmware(mac, pitch, id);
                             }
@@ -104,11 +104,11 @@
                         httpRequest.onreadystatechange = function(){
                             if (httpRequest.readyState === XMLHttpRequest.DONE) {
                                 if (httpRequest.status === 200) {
-                                    console.log("started update");
+                                    console.log("started firmware update");
                                     self.isUpdateInProgress = true;
-                                    self.pollUpdateInterval = setInterval(self.pollFirmwareUpdateStatus, 7000, id);
+                                    self.pollUpdateInterval = setInterval(self.pollFirmwareUpdateStatus, 5000, id);
                                 } else {
-                                    console.error("failed to update firmware:" + httpRequest.statusText);
+                                    console.log("failed to update firmware:" + httpRequest.statusText);
                                 }
                             }
                         };
@@ -117,54 +117,67 @@
                     },
                     pollFirmwareUpdateStatus: function(id) {
                         self = this;
-                        axios.get("{{ url_for('poll_firmware_update') }}")
-                            .then(function (response) {
-                                let isFinishedStatus = response.data.data[0].attributes["is-finished"];
-                                if(isFinishedStatus) {
-                                    clearInterval(self.pollUpdateInterval);
-                                    self.rebootDevice(id)
+                        let httpRequest = new XMLHttpRequest();
+                        httpRequest.onreadystatechange = function() {
+                            if (httpRequest.readyState === XMLHttpRequest.DONE) {
+                                if (httpRequest.status === 200) {
+                                    let isFinishedStatus = JSON.parse(httpRequest.response).data[0].attributes["is-finished"];
+                                    console.log(isFinishedStatus ? "pollFirmwareUpdateStatus----flashed firmware 100%"  : "pollFirmwareUpdateStatus---flashing firmware...")
+                                    if(isFinishedStatus) {
+                                        clearInterval(self.pollUpdateInterval);
+                                        self.rebootDevice(id);
+                                    }
+                                } else {
+                                    console.log("failed to pollFirmwareUpdateStatus:" + httpRequest.statusText);
                                 }
-                                console.log(isFinishedStatus ? "flashed firmware 100%"  : " flashing firmware...")
-
-                            })
-                            .catch(function (error) {
-                                console.log(error)
-
-                            })
+                            }
+                        };
+                        httpRequest.open('GET', "{{ url_for('poll_firmware_update') }}", false);
+                        httpRequest.send();
                     },
                     rebootDevice: function(id) {
                         let data = new FormData();
                         data.append('id', id);
                         self = this;
-                        axios.post("{{ url_for('reboot_devices') }}", data)
-                            .then(function (response) {
-                                console.log(response);
-                                self.pollRebootProgress(id);
-                            })
-                            .catch(function(error) {
-                                console.log(error)
-
-                            })
+                        let httpRequest = new XMLHttpRequest();
+                        httpRequest.onreadystatechange = function() {
+                            if (httpRequest.readyState === XMLHttpRequest.DONE) {
+                                if (httpRequest.status === 200) {
+                                    console.log("started rebooting devices");
+                                    self.pollRebootProgress(id);
+                                } else {
+                                    console.log("failed to start rebooting devices" + httpRequest.statusText);
+                                }
+                            }
+                        };
+                        httpRequest.open('POST', "{{ url_for('reboot_devices') }}", false);
+                        httpRequest.send(data);
                     },
                     pollRebootProgress: function (id) {
-                        axios.get("{{ url_for('poll_reboot') }}")
-                            .then(async function (response) {
-                                let isFinished = response.data.data[0].attributes["is-finished"];
-                                if(isFinished) {
-                                    await self.patchModules(id);
-                                    await self.patchLayouts(id);
-                                    await self.restartController();
-                                    self.wasUpdated += 1;
-                                    if(self.wasUpdated == 2) {
-                                        setTimeout(self.getModules, 7000);//important to wait until updated
+                        self = this;
+                        let httpRequest = new XMLHttpRequest();
+                        httpRequest.onreadystatechange = async function() {
+                            if (httpRequest.readyState === XMLHttpRequest.DONE) {
+                                if (httpRequest.status === 200) {
+                                    let isFinished = JSON.parse(httpRequest.response).data[0].attributes["is-finished"];
+                                    console.log(isFinished ? "poll reboot progress----rebooted fully"  : "poll reboot progress-----rebooting still...");
+                                    if(isFinished) {
+                                        await self.patchModules(id);
+                                        await self.saveConfig();
+                                        await self.patchLayouts(id);
+                                        self.wasUpdated += 1;
+                                        if(self.wasUpdated == 2) {
+                                            await self.restartController();
+                                            setTimeout(self.getModules, 7000);//important to wait until updated
+                                        }
                                     }
+                                } else {
+                                    console.log("failed to poll reboot progress" + httpRequest.statusText);
                                 }
-                                console.log(isFinished ? "updated 100%"  : " updating...")
-                            })
-                            .catch(function(error) {
-                                console.log(error)
-
-                            })
+                            }
+                        };
+                        httpRequest.open('GET', "{{ url_for('poll_reboot') }}", false);
+                        httpRequest.send();
                     },
                     patchModules: function (id) {
                         let data = new FormData();
@@ -179,14 +192,19 @@
                             data.append('the_other_pitch', this.new_left_pitch);
                         }
                         self = this;
-                        axios.post("{{ url_for('patch_modules') }}", data)
-                            .then(function (response) {
-                                console.log(response);
-                            })
-                            .catch(function(error) {
-                                console.log(error);
 
-                            })
+                        let httpRequest = new XMLHttpRequest();
+                        httpRequest.onreadystatechange = function() {
+                            if (httpRequest.readyState === XMLHttpRequest.DONE) {
+                                if (httpRequest.status === 200) {
+                                    console.log("patched modules");
+                                } else {
+                                    console.log("failed to patch modules" + httpRequest.statusText);
+                                }
+                            }
+                        };
+                        httpRequest.open('POST', "{{ url_for('patch_modules') }}", false);
+                        httpRequest.send(data);
                     },
                     patchLayouts: function (id) {
                         let data = new FormData();
@@ -201,24 +219,61 @@
                             data.append('the_other_pitch', this.new_left_pitch);
                         }
 
-                        axios.post("{{ url_for('patch_layouts') }}", data)
-                            .then(function (response) {
-                                console.log(response);
-                            })
-                            .catch(function(error) {
-                                console.log(error);
-
-                            })
+                        let httpRequest = new XMLHttpRequest();
+                        httpRequest.onreadystatechange = function() {
+                            if (httpRequest.readyState === XMLHttpRequest.DONE) {
+                                if (httpRequest.status === 200) {
+                                    console.log("patched layouts");
+                                } else {
+                                    console.log("failed to patch layouts" + httpRequest.statusText);
+                                }
+                            }
+                        };
+                        httpRequest.open('POST', "{{ url_for('patch_layouts') }}", false);
+                        httpRequest.send(data);
                     },
                     restartController: function () {
-                        axios.post("{{ url_for('restart_controller') }}")
-                            .then(function (response) {
-                                console.log(response);
-                            })
-                            .catch(function(error) {
-                                console.log(error);
-
-                            })
+                        let httpRequest = new XMLHttpRequest();
+                        httpRequest.onreadystatechange = function() {
+                            if (httpRequest.readyState === XMLHttpRequest.DONE) {
+                                if (httpRequest.status === 200) {
+                                    console.log("restarted controller");
+                                    self.restartScheduler();
+                                } else {
+                                    console.log("failed to restart controller" + httpRequest.statusText);
+                                }
+                            }
+                        };
+                        httpRequest.open('POST', "{{ url_for('restart_controller') }}", false);
+                        httpRequest.send();
+                    },
+                    restartScheduler: function () {
+                        let httpRequest = new XMLHttpRequest();
+                        httpRequest.onreadystatechange = function() {
+                            if (httpRequest.readyState === XMLHttpRequest.DONE) {
+                                if (httpRequest.status === 200) {
+                                    console.log("restarted scheduler");
+                                } else {
+                                    console.log("failed to restart scheduler" + httpRequest.statusText);
+                                }
+                            }
+                        };
+                        httpRequest.open('POST', "{{ url_for('restart_scheduler') }}", false);
+                        httpRequest.send();
+                    },
+                    saveConfig: function () {
+                        let httpRequest = new XMLHttpRequest();
+                        httpRequest.onreadystatechange = function() {
+                            if (httpRequest.readyState === XMLHttpRequest.DONE) {
+                                if (httpRequest.status === 200) {
+                                    console.log("saved configuration");
+                                } else {
+                                    console.log("failed to save configuration" + httpRequest.statusText);
+                                }
+                            }
+                        };
+                        httpRequest.open('POST', "{{ url_for('save_configuration') }}", false);
+                        httpRequest.send();
                     }
                 }
             })}
