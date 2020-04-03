@@ -37,7 +37,7 @@
                     new_right_pitch: null,
                     pollUpdateInterval: null,
                     isUpdateInProgress: false,
-                    wasUpdated: 0
+                    modulesUpdatedCount: 0
                 },
                 mounted() {
                     this.getModules();
@@ -73,8 +73,8 @@
                         httpRequest.send();
                     },
                     updateButtonHandle: async function() {
-                        this.wasUpdated = 0;//reseting since last update
                         console.log("updateButtonHandle entered");
+                        this.modulesUpdatedCount = 0;
 
                         if (this.wasLeftPitchChanged) {
                             let mac = this.modules['left']['mac'];
@@ -165,8 +165,8 @@
                                         await self.patchModules(id);
                                         await self.saveConfig();
                                         await self.patchLayouts(id);
-                                        self.wasUpdated += 1;
-                                        if(self.wasUpdated == 2) {
+                                        self.modulesUpdatedCount += 1;
+                                        if(self.modulesUpdatedCount == 2) {
                                             await self.restartController();
                                             setTimeout(self.getModules, 7000);//important to wait until updated
                                         }
@@ -284,7 +284,9 @@
     <div class="row" v-if="!this.isUpdateInProgress">
         <div class="col-md-6">
             <div>
-                <h1>Select pitch on LEFT side</h1>
+                <h1>Select pitch
+                    on LEFT side
+                </h1>
             </div>
             <div class="option-group">
                 <div class="option-container">
@@ -333,7 +335,9 @@
         </div>
         <div class="col-md-6">
             <div>
-                <h1>Select pitch on right side</h1>
+                <h1>Select pitch
+                    on right side
+                </h1>
             </div>
             <div class="option-group">
                 <div class="option-container">
@@ -382,13 +386,13 @@
         </div>
     </div>
 
-    <div v-if="this.isUpdateInProgress && this.wasUpdated != 2">
+    <div v-if="this.isUpdateInProgress && this.modulesUpdatedCount != 2">
         <div class="progress-bar-animated progress-bar-striped progress-bar bg-danger tile" role="progressbar"
              style="width: 400px; height:50px" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
             <span class="status-msg">Updating...</span>
         </div>
     </div>
-    <div v-if="!this.isUpdateInProgress && this.wasUpdated == 2" class="tile progress-bar-striped bg-success" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
+    <div v-if="!this.isUpdateInProgress && this.modulesUpdatedCount == 2" class="tile progress-bar-striped bg-success" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
         <span class="status-msg">Update successful</span>
     </div>
     <div v-if="!this.isUpdateInProgress && this.wasNewValueSelected" v-on:click="this.updateButtonHandle" class="tile" style="background-color: darkorange;">

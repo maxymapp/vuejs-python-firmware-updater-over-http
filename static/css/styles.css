@@ -3,6 +3,7 @@ h1 {
     color: white;
     text-transform: uppercase;
     margin-bottom: 5rem;
+    white-space: pre-line;
 }
 .tile {
     margin: auto;
