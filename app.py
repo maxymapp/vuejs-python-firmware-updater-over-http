@@ -1,9 +1,7 @@
-import cgi, requests, os, pycurl, array, uuid, re, base64
-from urllib.parse import urlencode, quote_plus
-from requests_toolbelt.multipart.encoder import MultipartEncoder
-from pprint import pprint
-from flask import Flask, render_template, request, jsonify
+import requests
+from flask import Flask, render_template, request
 from flask.json import dumps
+from requests_toolbelt.multipart.encoder import MultipartEncoder
 
 app = Flask('PitchUpdater')
 app.config.from_pyfile('config.cfg')
