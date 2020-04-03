@@ -386,13 +386,13 @@
         </div>
     </div>
 
-    <div v-if="this.isUpdateInProgress && this.modulesUpdatedCount != 2">
-        <div class="progress-bar-animated progress-bar-striped progress-bar bg-danger tile" role="progressbar"
+    <div v-if="this.isUpdateInProgress">
+        <div class="progress-bar-animated progress-bar-striped progress-bar bg-warning tile" role="progressbar"
              style="width: 400px; height:50px" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
-            <span class="status-msg">Updating...</span>
+            <span class="status-msg">Updating displays...</span>
         </div>
     </div>
-    <div v-if="!this.isUpdateInProgress && this.modulesUpdatedCount == 2" class="tile progress-bar-striped bg-success" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
+    <div v-if="!this.isUpdateInProgress && this.modulesUpdatedCount == 2 && !this.wasNewValueSelected" class="tile progress-bar-striped bg-success" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
         <span class="status-msg">Update successful</span>
     </div>
     <div v-if="!this.isUpdateInProgress && this.wasNewValueSelected" v-on:click="this.updateButtonHandle" class="tile" style="background-color: darkorange;">
