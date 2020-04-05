@@ -43,14 +43,14 @@
                     this.getModules();
                 },
                 computed: {
-                    wasNewValueSelected: function () {
-                        return this.modules? ((this.new_left_pitch !== this.modules['left']['pitch']) || (this.new_right_pitch !== this.modules['right']['pitch'])) : false;
-                    },
                     wasLeftPitchChanged: function () {
                         return (this.new_left_pitch !== this.modules['left']['pitch']);
                     },
                     wasRightPitchChanged: function () {
                         return (this.new_right_pitch !== this.modules['right']['pitch']);
+                    },
+                    modulesToUpdateCount: function () {
+                        return this.modules? ((this.wasLeftPitchChanged? 1 : 0) + (this.wasRightPitchChanged? 1 : 0)) : false;
                     }
                 },
                 methods: {
@@ -165,8 +165,8 @@
                                         await self.patchModules(id);
                                         await self.saveConfig();
                                         await self.patchLayouts(id);
-                                        self.modulesUpdatedCount += 1;
-                                        if(self.modulesUpdatedCount == 2) {
+                                        ++self.modulesUpdatedCount;
+                                        if (self.modulesUpdatedCount === self.modulesToUpdateCount) {
                                             await self.restartController();
                                             setTimeout(self.getModules, 7000);//important to wait until updated
                                         }
@@ -392,10 +392,10 @@
             <span class="status-msg">Updating displays...</span>
         </div>
     </div>
-    <div v-if="!this.isUpdateInProgress && this.modulesUpdatedCount == 2 && !this.wasNewValueSelected" class="tile progress-bar-striped bg-success" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
+    <div v-if="!this.isUpdateInProgress && this.modulesUpdatedCount && !this.modulesToUpdateCount" class="tile progress-bar-striped bg-success" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
         <span class="status-msg">Update successful</span>
     </div>
-    <div v-if="!this.isUpdateInProgress && this.wasNewValueSelected" v-on:click="this.updateButtonHandle" class="tile" style="background-color: darkorange;">
+    <div v-if="!this.isUpdateInProgress && this.modulesToUpdateCount" v-on:click="this.updateButtonHandle" class="tile" style="background-color: darkorange;">
         <span class="status-msg">Update</span>
     </div>
 </div>
