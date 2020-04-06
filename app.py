@@ -6,17 +6,65 @@ from requests_toolbelt.multipart.encoder import MultipartEncoder
 app = Flask('PitchUpdater')
 app.config.from_pyfile('config.cfg')
 
+PITCH_SIZES = (
+    1.6,
+    2.0,
+    2.5,
+    4.0
+)
+
+PIXEL_TO_PITCH = {
+    192: 1.6,
+    160: 2.0,
+    128: 2.5,
+    80: 4.0
+}
+
+PITCH_TO_DIMS = {
+    '1.6': {'w': 192, 'h': 216},
+    '2.0': {'w': 160, 'h': 180},
+    '2.5': {'w': 128, 'h': 144},
+    '4.0': {'w': 80, 'h': 90}
+}
+
+DEVICE_CLASS_TO_PITCH = {
+    'TCO1_6_I': 1.6,
+    'TCO2_0_I': 2.0,
+    'TCO2_5_I': 2.5,
+    'TCO4_0_I': 4.0
+}
+
+FIRMWARE_FILES = {
+    "1.6": "TCO1_6_60Hz_Internal.d3",
+    "2.0": "TCO2_0_60Hz_Internal.d3",
+    "2.5": "TCO2_5_60Hz_Internal.d3",
+    "4.0": "TCO4_0_60Hz_Internal.d3"
+}
+
 @app.route('/')
 def hello():
+    authorize()
     return render_template('index.html')
 
+def authorize():
+    url = 'http://' + app.config["IP_ADDRESS"] + "/api/token"
+    data = {
+        "password": app.config["PASSWORD"],
+        "username": app.config["USERNAME"]
+    }
+    r = requests.post(url, data=data)
+
+    token = r.json()['access_token']
+    app.config["AUTH_TOKEN"] = token
+
 def get_devices():
-    response = requests.get('http://' + app.config["IP_ADDRESS"] + "/api/devices").json()
+    headers = {'Authorization': 'Bearer ' + app.config["AUTH_TOKEN"]}
+    response = requests.get('http://' + app.config["IP_ADDRESS"] + "/api/devices", headers=headers).json()
     devices = {}
     for device in response['data']:
         device_class = device['attributes']['device-class']
         if device_class.startswith('TCO'):
-            pitch = app.config["DEVICE_CLASS_TO_PITCH"][device_class]
+            pitch = DEVICE_CLASS_TO_PITCH[device_class]
             mac = device['attributes']['mac']
             devices[mac] = pitch
     return devices
@@ -24,8 +72,8 @@ def get_devices():
 @app.route('/modules')
 def get_modules():
     devices = get_devices()
-
-    response = requests.get('http://' + app.config["IP_ADDRESS"] + "/api/modules").json()
+    headers = {'Authorization': 'Bearer ' + app.config["AUTH_TOKEN"]}
+    response = requests.get('http://' + app.config["IP_ADDRESS"] + "/api/modules", headers=headers).json()
 
     if len(response['data']) < 2:
         return "either or both modules are not found"
@@ -47,7 +95,7 @@ def update_firmware():
     pitch = request.form['pitch']
 
     firmware_path = app.config["FIRMWARE_PATH"]
-    firmware_file = app.config["FIRMWARE_FILES"][pitch]
+    firmware_file = FIRMWARE_FILES[pitch]
     fw = firmware_path + firmware_file
     # return dumps(fw)
 
@@ -61,10 +109,14 @@ def update_firmware():
             'file': (firmware_file, open(fw, 'rb'), 'application/octet-stream'),
         }
     )
+    headers = {
+        'Content-Type': mp_encoder.content_type,
+        'Authorization': 'Bearer ' + app.config["AUTH_TOKEN"]
+    }
     r = requests.post(
         url,
         data=mp_encoder,
-        headers={'Content-Type': mp_encoder.content_type, 'Authorization' : 'Bearer ' + auth_token}
+        headers=headers
     )
     return dumps(r.status_code)
 
@@ -81,7 +133,7 @@ def reboot_devices():
     id = request.form['id']
     url = 'http://' + app.config["IP_ADDRESS"] + '/api/devices?command=reboot'
     headers = {'Authorization': 'Bearer ' + app.config["AUTH_TOKEN"]}
-    r = requests.post(url, data = {'ids': [id]}, headers=headers)
+    r = requests.post(url, data={'ids': [id]}, headers=headers)
     return 'rebooting macs'
 
 @app.route('/poll-reboot')
@@ -94,18 +146,12 @@ def poll_reboot():
 
 @app.route('/patch-modules', methods=['POST'])
 def patch_modules():
-    pitch_to_dims = {
-        '1.6': {'w': 192, 'h': 216},
-        '2.0': {'w': 160, 'h': 180},
-        '2.5': {'w': 128, 'h': 144},
-        '4.0': {'w': 80, 'h': 90}
-    }
     module_id = request.form['module_id']
     this_pitch = request.form['this_pitch']
 
     if "the_other_pitch" in request.form:
         the_other_pitch = request.form['the_other_pitch']
-        offset_x = pitch_to_dims[the_other_pitch]['w']
+        offset_x = PITCH_TO_DIMS[the_other_pitch]['w']
     else:
         offset_x = 0
 
@@ -119,8 +165,8 @@ def patch_modules():
                     "y": 0
                 },
                 "size": {
-                    "width": pitch_to_dims[this_pitch]['w'],
-                    "height": pitch_to_dims[this_pitch]['h']
+                    "width": PITCH_TO_DIMS[this_pitch]['w'],
+                    "height": PITCH_TO_DIMS[this_pitch]['h']
                 }
             }
         }
@@ -140,18 +186,12 @@ def save_configuration():
 
 @app.route('/patch-layouts', methods=['POST'])
 def patch_layouts():
-    pitch_to_dims = {
-        '1.6': {'w': 192, 'h': 216},
-        '2.0': {'w': 160, 'h': 180},
-        '2.5': {'w': 128, 'h': 144},
-        '4.0': {'w': 80, 'h': 90}
-    }
     module_id = request.form['module_id']
     this_pitch = request.form['this_pitch']
 
     if "the_other_pitch" in request.form:
         the_other_pitch = request.form['the_other_pitch']
-        offset_x = pitch_to_dims[the_other_pitch]['w']
+        offset_x = PITCH_TO_DIMS[the_other_pitch]['w']
         layout_id = "0x8e26617cd8"
     else:
         offset_x = 0
@@ -170,8 +210,8 @@ def patch_layouts():
                     "y": 0
                 },
                 "size": {
-                    "width": pitch_to_dims[this_pitch]['w'],
-                    "height": pitch_to_dims[this_pitch]['h']
+                    "width": PITCH_TO_DIMS[this_pitch]['w'],
+                    "height": PITCH_TO_DIMS[this_pitch]['h']
                 }
             }
         }
