@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}"></link>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
@@ -10,7 +11,8 @@
 
     <style>
         html {
-            background: url("{{ url_for('static',filename='images/d3bg.png') }}") no-repeat 0px 0px;
+            background: url("{{ url_for('static',filename='images/gray.png') }}") no-repeat 0px 0px;
+            background-size: cover;
         }
         [v-cloak] {
             display: none;
@@ -20,9 +22,7 @@
     <script src="{{ url_for('static', filename='scripts/vue.js') }}"></script>
 
     <script>
-        if (navigator.onLine) {
-            console.log('online');
-        } else {
+        if (!navigator.onLine) {
             console.log('offline');
         }
         window.onload = function () {
