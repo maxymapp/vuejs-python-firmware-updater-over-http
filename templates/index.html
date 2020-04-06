@@ -159,13 +159,14 @@
                                     let isFinished = JSON.parse(httpRequest.response).data[0].attributes["is-finished"];
                                     console.log(isFinished ? "poll reboot progress----rebooted fully"  : "poll reboot progress-----rebooting still...");
                                     if(isFinished) {
-                                        await self.patchModules(id);
-                                        await self.saveConfig();
-                                        await self.patchLayouts(id);
+                                        self.patchModules(id);
+                                        self.saveConfig();
+                                        self.patchLayouts(id);
                                         ++self.modulesUpdatedCount;
                                         if (self.modulesUpdatedCount === self.modulesToUpdateCount) {
-                                            await self.restartController();
-                                            setTimeout(self.getModules, 7000);//important to wait until updated
+                                            self.restartController();
+                                            self.restartScheduler();
+                                            setTimeout(self.getModules, 10000);
                                         }
                                     }
                                 } else {
@@ -235,7 +236,6 @@
                             if (httpRequest.readyState === XMLHttpRequest.DONE) {
                                 if (httpRequest.status === 200) {
                                     console.log("restarted controller");
-                                    self.restartScheduler();
                                 } else {
                                     console.log("failed to restart controller" + httpRequest.statusText);
                                 }
