@@ -180,14 +180,14 @@
                     patchModules: function (id) {
                         let data = new FormData();
                         data.append('module_id', id);
-                        //this pitch used for new dimensions, the other pitch - for its offset
-                        if (id == 607608) {
-                            data.append('this_pitch', this.new_left_pitch);
-                            {#data.append('the_other_pitch', this.new_right_pitch);#}
+
+                        if (id == self.modules['left']['pitch']) {
+                            data.append('new_pitch', this.new_left_pitch);
+                            //update right side with the new offset
                         }
-                        if (id == 607552) {
-                            data.append('this_pitch', this.new_right_pitch);
-                            data.append('the_other_pitch', this.new_left_pitch);
+                        if (id == self.modules['right']['pitch']) {
+                            data.append('new_pitch', this.new_right_pitch);
+                            data.append('left_offset_pitch', this.new_left_pitch);
                         }
                         self = this;
 
@@ -207,14 +207,14 @@
                     patchLayouts: function (id) {
                         let data = new FormData();
                         data.append('module_id', id);
-                        //this pitch used for new dimensions, the other pitch - for its offset
+
                         if (id == 607608) {
-                            data.append('this_pitch', this.new_left_pitch);
-                            {#data.append('the_other_pitch', this.new_right_pitch);#}
+                            data.append('new_pitch', this.new_left_pitch);
+                            //update right side with the new offset
                         }
                         if (id == 607552) {
-                            data.append('this_pitch', this.new_right_pitch);
-                            data.append('the_other_pitch', this.new_left_pitch);
+                            data.append('new_pitch', this.new_right_pitch);
+                            data.append('left_offset_pitch', this.new_left_pitch);
                         }
 
                         let httpRequest = new XMLHttpRequest();

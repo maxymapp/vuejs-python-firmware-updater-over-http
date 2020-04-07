@@ -147,11 +147,11 @@ def poll_reboot():
 @app.route('/patch-modules', methods=['POST'])
 def patch_modules():
     module_id = request.form['module_id']
-    this_pitch = request.form['this_pitch']
+    new_pitch = request.form['new_pitch']
 
-    if "the_other_pitch" in request.form:
-        the_other_pitch = request.form['the_other_pitch']
-        offset_x = PITCH_TO_DIMS[the_other_pitch]['w']
+    if "left_offset_pitch" in request.form:
+        left_offset_pitch = request.form['left_offset_pitch']
+        offset_x = PITCH_TO_DIMS[left_offset_pitch]['w']
     else:
         offset_x = 0
 
@@ -165,8 +165,8 @@ def patch_modules():
                     "y": 0
                 },
                 "size": {
-                    "width": PITCH_TO_DIMS[this_pitch]['w'],
-                    "height": PITCH_TO_DIMS[this_pitch]['h']
+                    "width": PITCH_TO_DIMS[new_pitch]['w'],
+                    "height": PITCH_TO_DIMS[new_pitch]['h']
                 }
             }
         }
@@ -187,11 +187,11 @@ def save_configuration():
 @app.route('/patch-layouts', methods=['POST'])
 def patch_layouts():
     module_id = request.form['module_id']
-    this_pitch = request.form['this_pitch']
+    new_pitch = request.form['new_pitch']
 
-    if "the_other_pitch" in request.form:
-        the_other_pitch = request.form['the_other_pitch']
-        offset_x = PITCH_TO_DIMS[the_other_pitch]['w']
+    if "left_offset_pitch" in request.form:
+        left_offset_pitch = request.form['left_offset_pitch']
+        offset_x = PITCH_TO_DIMS[left_offset_pitch]['w']
         layout_id = "0x8e26617cd8"
     else:
         offset_x = 0
@@ -210,8 +210,8 @@ def patch_layouts():
                     "y": 0
                 },
                 "size": {
-                    "width": PITCH_TO_DIMS[this_pitch]['w'],
-                    "height": PITCH_TO_DIMS[this_pitch]['h']
+                    "width": PITCH_TO_DIMS[new_pitch]['w'],
+                    "height": PITCH_TO_DIMS[new_pitch]['h']
                 }
             }
         }
