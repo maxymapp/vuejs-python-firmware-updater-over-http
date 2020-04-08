@@ -80,7 +80,7 @@
 
                             this.updateFirmware(mac, pitch, id);
                         }
-                        if(this.wasRightPitchChanged) {
+                        if(this.wasLeftPitchChanged || this.wasRightPitchChanged) {
                             let mac = this.modules['right']['mac'];
                             let pitch = this.new_right_pitch;
                             let id = this.modules['right']['id'];
