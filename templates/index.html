@@ -79,14 +79,6 @@
                             let id = this.modules['left']['id'];
 
                             this.updateFirmware(mac, pitch, id);
-
-                            if(!this.wasRightPitchChanged) {
-                                //still update the right side but only with patching dimensions
-                                let id = this.modules['right']['id'];
-                                this.patchModules(id);
-                                this.saveConfig();
-                                this.patchLayouts(id);
-                            }
                         }
                         if(this.wasRightPitchChanged) {
                             let mac = this.modules['right']['mac'];
@@ -189,14 +181,15 @@
                         let data = new FormData();
                         data.append('module_id', id);
 
-                        if (id == 607608) {
+                        if (id == self.modules['left']['pitch']) {
                             data.append('new_pitch', this.new_left_pitch);
                             //update right side with the new offset
                         }
-                        if (id == 607552) {
+                        if (id == self.modules['right']['pitch']) {
                             data.append('new_pitch', this.new_right_pitch);
                             data.append('left_offset_pitch', this.new_left_pitch);
                         }
+                        self = this;
 
                         let httpRequest = new XMLHttpRequest();
                         httpRequest.onreadystatechange = function() {
