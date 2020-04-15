@@ -181,15 +181,14 @@
                         let data = new FormData();
                         data.append('module_id', id);
 
-                        if (id == self.modules['left']['pitch']) {
+                        if (id == 607608) {
                             data.append('new_pitch', this.new_left_pitch);
                             //update right side with the new offset
                         }
-                        if (id == self.modules['right']['pitch']) {
+                        if (id == 607552) {
                             data.append('new_pitch', this.new_right_pitch);
                             data.append('left_offset_pitch', this.new_left_pitch);
                         }
-                        self = this;
 
                         let httpRequest = new XMLHttpRequest();
                         httpRequest.onreadystatechange = function() {
