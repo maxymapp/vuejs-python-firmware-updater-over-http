@@ -47,6 +47,8 @@
                         return (this.new_right_pitch !== this.modules['right']['pitch']);
                     },
                     modulesToUpdateCount: function () {
+                        //TODO: update 2 devices even if only left changed; 1 if only right
+                        //restarted the controller after 1st update before 2nd because
                         return this.modules? ((this.wasLeftPitchChanged? 1 : 0) + (this.wasRightPitchChanged? 1 : 0)) : false;
                     }
                 },
