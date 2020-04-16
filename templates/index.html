@@ -47,7 +47,7 @@
                         return (this.new_right_pitch !== this.modules['right']['pitch']);
                     },
                     modulesToUpdateCount: function () {
-                        //TODO: update 2 devices even if only left changed; 1 if only right
+                        //TODO: set modulesToUpdateCount to 2 even if only left changed (because modulesToUpdateCount is used to know when to restart the controller);
                         //restarted the controller after 1st update before 2nd because
                         return this.modules? ((this.wasLeftPitchChanged? 1 : 0) + (this.wasRightPitchChanged? 1 : 0)) : false;
                     }
@@ -71,7 +71,7 @@
                         httpRequest.open('GET', "{{ url_for('get_modules') }}", false);
                         httpRequest.send();
                     },
-                    updateButtonHandle: async function() {
+                    updateButtonHandle: function() {
                         console.log("updateButtonHandle entered");
                         this.modulesUpdatedCount = 0;
 
@@ -155,7 +155,7 @@
                     pollRebootProgress: function (id) {
                         self = this;
                         let httpRequest = new XMLHttpRequest();
-                        httpRequest.onreadystatechange = async function() {
+                        httpRequest.onreadystatechange = function() {
                             if (httpRequest.readyState === XMLHttpRequest.DONE) {
                                 if (httpRequest.status === 200) {
                                     let isFinished = JSON.parse(httpRequest.response).data[0].attributes["is-finished"];
