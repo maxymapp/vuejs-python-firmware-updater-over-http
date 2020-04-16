@@ -186,12 +186,13 @@ def save_configuration():
 
 @app.route('/patch-layouts', methods=['POST'])
 def patch_layouts():
-    module_id = request.form['module_id']
     new_pitch = request.form['new_pitch']
+    layout_id = ""
 
     if "left_offset_pitch" in request.form:
         left_offset_pitch = request.form['left_offset_pitch']
         offset_x = PITCH_TO_DIMS[left_offset_pitch]['w']
+        #TODO move layout ids to configuration file
         layout_id = "0x8e26617cd8"
     else:
         offset_x = 0
@@ -203,7 +204,7 @@ def patch_layouts():
     data = {
         "data": {
             "type": "layouts",
-            "id": module_id,
+            "id": layout_id,
             "attributes": {
                 "position": {
                     "x": offset_x,
