@@ -41,25 +41,34 @@ FIRMWARE_FILES = {
     "4.0": "TCO4_0_60Hz_Internal.d3"
 }
 
+
 @app.route('/')
 def hello():
-    authorize()
+    get_token()
     return render_template('index.html')
 
-def authorize():
-    url = 'http://' + app.config["IP_ADDRESS"] + "/api/token"
-    data = {
-        "password": app.config["PASSWORD"],
-        "username": app.config["USERNAME"]
-    }
-    r = requests.post(url, data=data)
 
-    token = r.json()['access_token']
-    app.config["AUTH_TOKEN"] = token
+@app.route('/authorize')
+def get_token():
+    if app.config["AUTH_TOKEN"]:
+        return app.config["AUTH_TOKEN"]
+    else:
+        url = 'http://' + app.config["IP_ADDRESS"] + "/api/token"
+        data = {
+            "password": app.config["PASSWORD"],
+            "username": app.config["USERNAME"]
+        }
+        response = requests.post(url, data=data)
+        token = response.json()['access_token']
+        app.config["AUTH_TOKEN"] = token
+
+        return token
+
+def get_headers():
+    return {'Authorization': 'Bearer ' + get_token()}
 
 def get_devices():
-    headers = {'Authorization': 'Bearer ' + app.config["AUTH_TOKEN"]}
-    response = requests.get('http://' + app.config["IP_ADDRESS"] + "/api/devices", headers=headers).json()
+    response = requests.get('http://' + app.config["IP_ADDRESS"] + "/api/devices", headers=get_headers()).json()
     devices = {}
     for device in response['data']:
         device_class = device['attributes']['device-class']
@@ -69,11 +78,11 @@ def get_devices():
             devices[mac] = pitch
     return devices
 
+
 @app.route('/modules')
 def get_modules():
     devices = get_devices()
-    headers = {'Authorization': 'Bearer ' + app.config["AUTH_TOKEN"]}
-    response = requests.get('http://' + app.config["IP_ADDRESS"] + "/api/modules", headers=headers).json()
+    response = requests.get('http://' + app.config["IP_ADDRESS"] + "/api/modules", headers=get_headers()).json()
 
     if len(response['data']) < 2:
         return "either or both modules are not found"
@@ -89,6 +98,7 @@ def get_modules():
             modules['right'] = {'mac': mac, 'pitch': str(devices[mac]), 'id': str(module['id'])}
     return modules
 
+
 @app.route('/update-firmware', methods=['POST'])
 def update_firmware():
     mac = request.form['mac']
@@ -99,10 +109,9 @@ def update_firmware():
     fw = firmware_path + firmware_file
     # return dumps(fw)
 
-    auth_token = app.config["AUTH_TOKEN"]
     url = 'http://' + app.config["IP_ADDRESS"] + '/api/devices?command=update-firmware'
 
-    #MultipartEncoder explained in https://stackoverflow.com/a/12385661
+    # MultipartEncoder explained in https://stackoverflow.com/a/12385661
     mp_encoder = MultipartEncoder(
         fields={
             'ids': mac,
@@ -111,7 +120,7 @@ def update_firmware():
     )
     headers = {
         'Content-Type': mp_encoder.content_type,
-        'Authorization': 'Bearer ' + app.config["AUTH_TOKEN"]
+        'Authorization': 'Bearer ' + get_token()
     }
     r = requests.post(
         url,
@@ -120,29 +129,30 @@ def update_firmware():
     )
     return dumps(r.status_code)
 
+
 @app.route('/poll-firmware-update')
 def poll_firmware_update():
     url = 'http://' + app.config["IP_ADDRESS"] + "/api/progresses?filter[type]=firmware-update"
-    headers = {'Authorization': 'Bearer ' + app.config["AUTH_TOKEN"]}
 
-    r = requests.get(url, headers=headers)
+    r = requests.get(url, headers=get_headers())
     return r.content
+
 
 @app.route('/reboot-devices', methods=["POST"])
 def reboot_devices():
     id = request.form['id']
     url = 'http://' + app.config["IP_ADDRESS"] + '/api/devices?command=reboot'
-    headers = {'Authorization': 'Bearer ' + app.config["AUTH_TOKEN"]}
-    r = requests.post(url, data={'ids': [id]}, headers=headers)
+    r = requests.post(url, data={'ids': [id]}, headers=get_headers())
     return 'rebooting macs'
+
 
 @app.route('/poll-reboot')
 def poll_reboot():
     url = 'http://' + app.config["IP_ADDRESS"] + "/api/progresses?filter[type]=reboot-devices"
-    headers = {'Authorization': 'Bearer ' + app.config["AUTH_TOKEN"]}
 
-    r = requests.get(url, headers=headers)
+    r = requests.get(url, headers=get_headers())
     return r.content
+
 
 @app.route('/patch-modules', methods=['POST'])
 def patch_modules():
@@ -173,16 +183,16 @@ def patch_modules():
     }
 
     url = 'http://' + app.config["IP_ADDRESS"] + "/api/modules"
-    headers = {'Authorization': 'Bearer ' + app.config["AUTH_TOKEN"]}
-    r = requests.patch(url, dumps(data), headers=headers)
+    r = requests.patch(url, dumps(data), headers=get_headers())
     return r.content
+
 
 @app.route('/save-config', methods=['POST'])
 def save_configuration():
     url = "http://" + app.config["IP_ADDRESS"] + "/api/controllers/0?command=save-sign-configuration"
-    headers = {'Authorization': 'Bearer ' + app.config["AUTH_TOKEN"]}
-    r = requests.post(url, headers=headers)
+    r = requests.post(url, headers=get_headers())
     return r.content
+
 
 @app.route('/patch-layouts', methods=['POST'])
 def patch_layouts():
@@ -192,14 +202,13 @@ def patch_layouts():
     if "left_offset_pitch" in request.form:
         left_offset_pitch = request.form['left_offset_pitch']
         offset_x = PITCH_TO_DIMS[left_offset_pitch]['w']
-        #TODO move layout ids to configuration file
+        # TODO move layout ids to configuration file
         layout_id = "0x8e26617cd8"
     else:
         offset_x = 0
         layout_id = "0x8e26617cd7"
 
     url = 'http://' + app.config["IP_ADDRESS"] + "/api/layouts/" + layout_id
-    headers = {'Authorization': 'Bearer ' + app.config["AUTH_TOKEN"]}
 
     data = {
         "data": {
@@ -218,21 +227,20 @@ def patch_layouts():
         }
     }
     # return dumps(data)
-    r = requests.patch(url, dumps(data), headers=headers)
+    r = requests.patch(url, dumps(data), headers=get_headers())
     return r.content
 
 
 @app.route('/restart-controller', methods=['POST'])
 def restart_controller():
     url = 'http://' + app.config["IP_ADDRESS"] + '/api/controllers/0?command=restart'
-    headers = {'Authorization': 'Bearer ' + app.config["AUTH_TOKEN"]}
-    r = requests.post(url, headers=headers)
+    r = requests.post(url, headers=get_headers())
     return r.content
 
-#Restarting the Scheduler.
+
+# Restarting the Scheduler.
 @app.route('/restart-scheduler', methods=['POST'])
 def restart_scheduler():
     url = 'http://' + app.config["IP_ADDRESS"] + '/api/schedulers/0?command=restart'
-    headers = {'Authorization': 'Bearer ' + app.config["AUTH_TOKEN"]}
-    r = requests.post(url, headers=headers)
+    r = requests.post(url, headers=get_headers())
     return r.content
