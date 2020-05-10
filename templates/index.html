@@ -164,7 +164,8 @@
                                         self.patchModules(id);
                                         self.saveConfig();
                                         self.patchLayouts(id);
-                                        ++self.modulesUpdatedCount;
+                                        Vue.set(app, "modulesUpdatedCount", ++self.modulesUpdatedCount);
+                                        //move to watch property
                                         if (self.modulesUpdatedCount === self.modulesToUpdateCount) {
                                             self.restartController();
                                             self.restartScheduler();
