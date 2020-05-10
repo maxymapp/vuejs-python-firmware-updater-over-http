@@ -44,28 +44,23 @@ FIRMWARE_FILES = {
 
 @app.route('/')
 def hello():
-    get_token()
+    authorize()
     return render_template('index.html')
 
+def authorize():
+    url = 'http://' + app.config["IP_ADDRESS"] + "/api/token"
+    data = {
+        "password": app.config["PASSWORD"],
+        "username": app.config["USERNAME"]
+    }
+    r = requests.post(url, data=data)
 
-@app.route('/authorize')
-def get_token():
-    if app.config["AUTH_TOKEN"]:
-        return app.config["AUTH_TOKEN"]
-    else:
-        url = 'http://' + app.config["IP_ADDRESS"] + "/api/token"
-        data = {
-            "password": app.config["PASSWORD"],
-            "username": app.config["USERNAME"]
-        }
-        response = requests.post(url, data=data)
-        token = response.json()['access_token']
-        app.config["AUTH_TOKEN"] = token
+    token = r.json()['access_token']
+    app.config["AUTH_TOKEN"] = token
 
-        return token
 
 def get_headers():
-    return {'Authorization': 'Bearer ' + get_token()}
+    return {'Authorization': 'Bearer ' + app.config["AUTH_TOKEN"]}
 
 def get_devices():
     response = requests.get('http://' + app.config["IP_ADDRESS"] + "/api/devices", headers=get_headers()).json()
@@ -120,7 +115,7 @@ def update_firmware():
     )
     headers = {
         'Content-Type': mp_encoder.content_type,
-        'Authorization': 'Bearer ' + get_token()
+        'Authorization': 'Bearer ' + app.config["AUTH_TOKEN"]
     }
     r = requests.post(
         url,
