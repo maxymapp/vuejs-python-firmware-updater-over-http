@@ -47,9 +47,7 @@
                         return (this.new_right_pitch !== this.modules['right']['pitch']);
                     },
                     modulesToUpdateCount: function () {
-                        //TODO: set modulesToUpdateCount to 2 even if only left changed (because modulesToUpdateCount is used to know when to restart the controller);
-                        //restarted the controller after 1st update before 2nd because
-                        return this.modules? ((this.wasLeftPitchChanged? 1 : 0) + (this.wasRightPitchChanged? 1 : 0)) : false;
+                        return this.modules? (this.wasLeftPitchChanged ? 2 : (this.wasRightPitchChanged ? 1 : 0)) : false;
                     }
                 },
                 methods: {
@@ -104,7 +102,10 @@
                             if (httpRequest.readyState === XMLHttpRequest.DONE) {
                                 if (httpRequest.status === 200) {
                                     console.log("started firmware update");
+                                    //why setting to true only as late as after request to flash firmware?
                                     self.isUpdateInProgress = true;
+                                    //maybe should not care about not knowing what module's status we see
+                                    // just update both and see when status successful and never changes
                                     self.pollUpdateInterval = setInterval(self.pollFirmwareUpdateStatus, 5000, id);
                                 } else {
                                     console.log("failed to update firmware:" + httpRequest.statusText);
